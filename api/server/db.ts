@@ -25,7 +25,7 @@ export const pool = new Pool({
   connectionString: databaseUrl,
   max: 1, // Limit connections in serverless
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000,
+  connectionTimeoutMillis: 30000, // Increased from 10s to 30s
 });
 
 export const db = drizzle(pool, { schema });

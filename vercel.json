@@ -5,8 +5,8 @@
   "regions": ["sin1"],
   "functions": {
     "api/[...path].ts": {
-      "maxDuration": 60,
-      "memory": 1024,
+      "maxDuration": 25,
+      "memory": 3008,
       "includeFiles": "api/server/**,shared/**,node_modules/**"
     }
   },
