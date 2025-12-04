@@ -1,17 +1,11 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import express from "express";
 import cookieParser from "cookie-parser";
-import { registerRoutes } from "./server/routes.js";
 
 let app: express.Application | null = null;
 let initialized = false;
-let initError: Error | null = null;
 
 async function initializeApp() {
-  if (initError) {
-    throw initError;
-  }
-  
   if (initialized && app) {
     return app;
   }
@@ -35,20 +29,55 @@ async function initializeApp() {
     next();
   });
 
+  // Test endpoint
+  newApp.get("/api/test", (req, res) => {
+    console.log("[test] Health check");
+    res.json({ status: "ok", message: "API is running" });
+  });
+
+  // Health check
+  newApp.get("/api/health", (req, res) => {
+    console.log("[health] Database check");
+    try {
+      const hasDb = !!process.env.DATABASE_URL;
+      res.json({ 
+        status: "ok", 
+        database: hasDb ? "configured" : "not configured",
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Health check failed" });
+    }
+  });
+
   try {
-    console.log("[init] DATABASE_URL exists:", !!process.env.DATABASE_URL);
-    console.log("[init] Starting route registration...");
+    console.log("[init] Loading routes...");
     
-    // Register all routes
-    const result = await registerRoutes(newApp);
-    console.log("[init] Routes registered successfully, result:", !!result);
+    // Dynamically import routes to catch errors better
+    try {
+      const { registerRoutes } = await import("./server/routes.js");
+      console.log("[init] registerRoutes imported successfully");
+      
+      const result = await registerRoutes(newApp);
+      console.log("[init] Routes registered successfully");
+    } catch (importError) {
+      console.error("[init] Failed to load routes:", importError);
+      
+      // Add error endpoint that explains the problem
+      newApp.use((req, res) => {
+        res.status(500).json({
+          error: "Routes not initialized",
+          message: importError instanceof Error ? importError.message : String(importError),
+          endpoint: req.path
+        });
+      });
+    }
     
     initialized = true;
     app = newApp;
   } catch (error) {
-    console.error("[init] Error during registration:", error);
-    initError = error instanceof Error ? error : new Error(String(error));
-    throw initError;
+    console.error("[init] Error during initialization:", error);
+    throw error;
   }
 
   return newApp;
@@ -56,17 +85,18 @@ async function initializeApp() {
 
 export default async (req: VercelRequest, res: VercelResponse) => {
   try {
+    console.log("[handler] " + req.method + " " + req.url);
+    
     const application = await initializeApp();
     return application(req as any, res as any);
   } catch (error) {
     console.error("[handler] Fatal error:", error);
     const message = error instanceof Error ? error.message : String(error);
-    const stack = error instanceof Error ? error.stack : "";
     
     return res.status(500).json({ 
-      error: "Internal server error",
+      error: "Server error",
       message: message,
-      stack: process.env.NODE_ENV === "development" ? stack : undefined,
+      timestamp: new Date().toISOString()
     });
   }
 };
