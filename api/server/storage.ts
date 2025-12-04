@@ -29,7 +29,7 @@ import {
   type UserSession,
   type InsertUserSession,
 } from "../../shared/schema.js";
-import { db } from "./db";
+import { db } from "./db.js";
 import {
   eq,
   and,

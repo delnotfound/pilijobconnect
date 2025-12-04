@@ -727,11 +727,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const coverLetterData = req.body;
 
       if (!coverLetterData || typeof coverLetterData.content !== "string") {
-        return res
-          .status(400)
-          .json({
-            message: "Invalid cover letter data - content field required",
-          });
+        return res.status(400).json({
+          message: "Invalid cover letter data - content field required",
+        });
       }
 
       // Validate file type from base64 header
@@ -1421,7 +1419,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ["JOB TYPES DISTRIBUTION - PIE CHART DATA"],
           [""],
           ["Employment Type", "Count", "Percentage"],
-          ...(jobTypeStats || []).map((t: any) => [t.type, t.count, t.percentage]),
+          ...(jobTypeStats || []).map((t: any) => [
+            t.type,
+            t.count,
+            t.percentage,
+          ]),
           [""],
           [
             "TOTAL",
@@ -2061,12 +2063,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.send(excelBuffer);
       } catch (error) {
         console.error("Error exporting analytics:", error);
-        res
-          .status(500)
-          .json({
-            message: "Failed to export analytics",
-            error: error instanceof Error ? error.message : "Unknown error",
-          });
+        res.status(500).json({
+          message: "Failed to export analytics",
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
       }
     }
   );
@@ -2870,7 +2870,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       path: req.path,
       method: req.method,
     });
-    
+
     const status = err.status || err.statusCode || 500;
     res.status(status).json({
       message: err.message || "Internal Server Error",
