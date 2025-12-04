@@ -2862,6 +2862,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Global error handler - must be last
+  app.use((err: any, req: any, res: any, next: any) => {
+    console.error("[Error Handler] Caught error:", {
+      message: err.message,
+      status: err.status || err.statusCode || 500,
+      path: req.path,
+      method: req.method,
+    });
+    
+    const status = err.status || err.statusCode || 500;
+    res.status(status).json({
+      message: err.message || "Internal Server Error",
+      error: process.env.NODE_ENV === "development" ? err.stack : undefined,
+    });
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

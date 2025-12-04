@@ -5,8 +5,13 @@ import { registerRoutes } from "./server/routes.js";
 
 let app: express.Application | null = null;
 let initialized = false;
+let initError: Error | null = null;
 
 async function initializeApp() {
+  if (initError) {
+    throw initError;
+  }
+  
   if (initialized && app) {
     return app;
   }
@@ -31,16 +36,19 @@ async function initializeApp() {
   });
 
   try {
+    console.log("[init] DATABASE_URL exists:", !!process.env.DATABASE_URL);
     console.log("[init] Starting route registration...");
+    
     // Register all routes
-    await registerRoutes(newApp);
-    console.log("[init] Routes registered successfully");
+    const result = await registerRoutes(newApp);
+    console.log("[init] Routes registered successfully, result:", !!result);
     
     initialized = true;
     app = newApp;
   } catch (error) {
     console.error("[init] Error during registration:", error);
-    throw error;
+    initError = error instanceof Error ? error : new Error(String(error));
+    throw initError;
   }
 
   return newApp;
@@ -51,11 +59,14 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     const application = await initializeApp();
     return application(req as any, res as any);
   } catch (error) {
-    console.error("[handler] Error:", error);
+    console.error("[handler] Fatal error:", error);
     const message = error instanceof Error ? error.message : String(error);
+    const stack = error instanceof Error ? error.stack : "";
+    
     return res.status(500).json({ 
       error: "Internal server error",
-      message: message
+      message: message,
+      stack: process.env.NODE_ENV === "development" ? stack : undefined,
     });
   }
 };
