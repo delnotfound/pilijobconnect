@@ -50,9 +50,10 @@ async function getOrCreateApp() {
   });
 
   try {
-    console.log("[App] Registering routes...");
-    await registerRoutes(app);
-    console.log("[App] Routes registered successfully");
+    console.log("[App] Initializing routes...");
+    // Note: registerRoutes expects Express app, ignore the Server return type
+    await registerRoutes(app as any);
+    console.log("[App] Routes initialized successfully");
 
     // 404 handler
     app.use((req: Request, res: Response) => {
@@ -70,6 +71,7 @@ async function getOrCreateApp() {
 
     appInitialized = true;
     cachedApp = app;
+    console.log("[App] App ready");
   } catch (error) {
     console.error("[App] Initialization failed:", error);
     throw error;
