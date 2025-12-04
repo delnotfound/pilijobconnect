@@ -21,7 +21,7 @@ neonConfig.poolQueryViaFetch = true;
 
 // Don't create the pool immediately - create it lazily
 let pool: Pool | null = null;
-let db: any = null;
+let dbInstance: any = null;
 
 function initializePool() {
   if (!pool) {
@@ -37,33 +37,22 @@ function initializePool() {
 }
 
 function initializeDb() {
-  if (!db) {
+  if (!dbInstance) {
     const p = initializePool();
-    db = drizzle(p, { schema });
+    dbInstance = drizzle(p, { schema });
   }
-  return db;
+  return dbInstance;
 }
 
-// Export getters that initialize on first use
-export const getPool = () => initializePool();
-export const getDb = () => initializeDb();
-
-// For backward compatibility - these will trigger lazy initialization
-Object.defineProperty(globalThis, '__db__', {
-  value: null,
-  writable: true,
-  configurable: true
-});
-
-// Create a proxy object that initializes db on access
-export const db = new Proxy({}, {
+// Create a proxy that initializes db on first access
+export const db = new Proxy({} as any, {
   get: (target, prop) => {
     const actualDb = initializeDb();
     return (actualDb as any)[prop];
   }
 });
 
-export const pool = new Proxy({}, {
+export const pool = new Proxy({} as any, {
   get: (target, prop) => {
     const actualPool = initializePool();
     return (actualPool as any)[prop];

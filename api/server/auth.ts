@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-import { getDb } from "./db.js";
+import { db } from "./db.js";
 import { users, userSessions, type User } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
@@ -17,7 +17,10 @@ export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 12);
 }
 
-export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+export async function verifyPassword(
+  password: string,
+  hash: string
+): Promise<boolean> {
   return bcrypt.compare(password, hash);
 }
 
@@ -36,13 +39,13 @@ export function verifyToken(token: string): any {
 export async function createSession(userId: number): Promise<string> {
   const sessionId = generateToken({ userId, type: "session" });
   const expiresAt = new Date(Date.now() + SESSION_DURATION);
-  
-  await getDb().insert(userSessions).values({
+
+  await db.insert(userSessions).values({
     id: sessionId,
     userId,
     expiresAt,
   });
-  
+
   return sessionId;
 }
 
@@ -52,19 +55,21 @@ export async function validateSession(sessionId: string): Promise<User | null> {
       .select()
       .from(userSessions)
       .where(eq(userSessions.id, sessionId));
-    
+
     if (!session || session.expiresAt < new Date()) {
       if (session) {
-        await getDb().delete(userSessions).where(eq(userSessions.id, sessionId));
+        await getDb()
+          .delete(userSessions)
+          .where(eq(userSessions.id, sessionId));
       }
       return null;
     }
-    
+
     const [user] = await db
       .select()
       .from(users)
       .where(eq(users.id, session.userId));
-    
+
     return user || null;
   } catch (error) {
     return null;
@@ -72,41 +77,49 @@ export async function validateSession(sessionId: string): Promise<User | null> {
 }
 
 export async function destroySession(sessionId: string): Promise<void> {
-  await getDb().delete(userSessions).where(eq(userSessions.id, sessionId));
+  await db.delete(userSessions).where(eq(userSessions.id, sessionId));
 }
 
-export const requireAuth = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const requireAuth = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
   const sessionToken = req.cookies?.session;
-  
+
   if (!sessionToken) {
     return res.status(401).json({ message: "Authentication required" });
   }
-  
+
   const userObject = await validateSession(sessionToken);
   if (!userObject) {
     return res.status(401).json({ message: "Invalid or expired session" });
   }
-  
+
   req.user = userObject.id;
   req.userObject = userObject;
   next();
 };
 
 export function requireRole(roles: string[]) {
-  return async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  return async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
     await requireAuth(req, res, () => {
       if (!req.userObject) {
         return res.status(401).json({ message: "Authentication required" });
       }
-      
+
       if (!roles.includes(req.userObject.role)) {
-        return res.status(403).json({ 
-          message: "Insufficient permissions", 
+        return res.status(403).json({
+          message: "Insufficient permissions",
           required: roles,
-          current: req.userObject.role 
+          current: req.userObject.role,
         });
       }
-      
+
       next();
     });
   };
@@ -115,3 +128,4 @@ export function requireRole(roles: string[]) {
 export const requireJobSeeker = requireRole(["job_seeker"]);
 export const requireEmployer = requireRole(["employer", "admin"]);
 export const requireAdmin = requireRole(["admin"]);
+

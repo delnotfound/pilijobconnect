@@ -29,7 +29,7 @@ import {
   type UserSession,
   type InsertUserSession,
 } from "@shared/schema";
-import { getDb } from "./db";
+import { db } from "./db";
 import {
   eq,
   and,
@@ -310,7 +310,7 @@ export class DatabaseStorage implements IStorage {
     limit?: number;
     offset?: number;
   }): Promise<Job[]> {
-    const baseQuery = getDb().select().from(jobs);
+    const baseQuery = db.select().from(jobs);
 
     if (!options?.includeInactive) {
       if (options?.featuredFirst) {
@@ -342,7 +342,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getJob(id: number): Promise<Job | undefined> {
-    const result = await getDb().select().from(jobs).where(eq(jobs.id, id));
+    const result = await db.select().from(jobs).where(eq(jobs.id, id));
     return result[0] || undefined;
   }
 
@@ -378,7 +378,7 @@ export class DatabaseStorage implements IStorage {
     if (!job) return false;
 
     // PostgreSQL: delete returns array of deleted rows with .returning()
-    const result = await getDb().delete(jobs).where(eq(jobs.id, id)).returning();
+    const result = await db.delete(jobs).where(eq(jobs.id, id)).returning();
     return result.length > 0;
   }
 
@@ -1067,7 +1067,7 @@ export class DatabaseStorage implements IStorage {
 
   // Employer methods
   async createEmployer(employer: InsertEmployer): Promise<Employer> {
-    const result = await getDb().insert(employers).values(employer).returning();
+    const result = await db.insert(employers).values(employer).returning();
     return result[0];
   }
 
@@ -1109,7 +1109,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCategory(category: InsertCategory): Promise<Category> {
-    const result = await getDb().insert(categories).values(category).returning();
+    const result = await db.insert(categories).values(category).returning();
     return result[0];
   }
 
@@ -1132,17 +1132,17 @@ export class DatabaseStorage implements IStorage {
       verificationStatus: user.role === "employer" ? "pending" : null,
     };
 
-    const result = await getDb().insert(users).values(userData).returning();
+    const result = await db.insert(users).values(userData).returning();
     return result[0];
   }
 
   async getUserById(id: number): Promise<User | undefined> {
-    const result = await getDb().select().from(users).where(eq(users.id, id));
+    const result = await db.select().from(users).where(eq(users.id, id));
     return result[0] || undefined;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const result = await getDb().select().from(users).where(eq(users.email, email));
+    const result = await db.select().from(users).where(eq(users.email, email));
     return result[0] || undefined;
   }
 
@@ -1156,7 +1156,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteUser(id: number): Promise<boolean> {
-    const result = await getDb().delete(users).where(eq(users.id, id)).returning();
+    const result = await db.delete(users).where(eq(users.id, id)).returning();
     return result.length > 0;
   }
 
@@ -1217,7 +1217,7 @@ export class DatabaseStorage implements IStorage {
 
   // Job alerts methods
   async createJobAlert(alert: InsertJobAlert): Promise<JobAlert> {
-    const result = await getDb().insert(jobAlerts).values(alert).returning();
+    const result = await db.insert(jobAlerts).values(alert).returning();
     return result[0];
   }
 
@@ -1268,7 +1268,7 @@ export class DatabaseStorage implements IStorage {
     recentJobs: Job[];
   }> {
     const allJobs = await this.getAllJobs();
-    const allApplications = await getDb().select().from(applications);
+    const allApplications = await db.select().from(applications);
 
     // Get real employer and job seeker counts
     const [totalEmployers] = await db
@@ -1658,7 +1658,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllUsers(): Promise<User[]> {
-    return await getDb().select().from(users).orderBy(desc(users.createdAt));
+    return await db.select().from(users).orderBy(desc(users.createdAt));
   }
 
   async getAllApplicationsAdmin() {
@@ -1735,40 +1735,40 @@ export class DatabaseStorage implements IStorage {
     switch (tableName) {
       case "users":
         tableSchema = users;
-        rows = await getDb().select().from(users);
+        rows = await db.select().from(users);
         break;
       case "jobs":
         tableSchema = jobs;
-        rows = await getDb().select().from(jobs);
+        rows = await db.select().from(jobs);
         break;
       case "applications":
         tableSchema = applications;
-        rows = await getDb().select().from(applications);
+        rows = await db.select().from(applications);
         break;
       case "employers":
         tableSchema = employers;
-        rows = await getDb().select().from(employers);
+        rows = await db.select().from(employers);
         break;
       case "categories":
         tableSchema = categories;
-        rows = await getDb().select().from(categories);
+        rows = await db.select().from(categories);
         break;
       case "saved_jobs":
         tableSchema = savedJobs;
-        rows = await getDb().select().from(savedJobs);
+        rows = await db.select().from(savedJobs);
         break;
       case "job_alerts":
         tableSchema = jobAlerts;
-        rows = await getDb().select().from(jobAlerts);
+        rows = await db.select().from(jobAlerts);
         break;
       case "user_sessions":
         tableSchema = userSessions;
-        rows = await getDb().select().from(userSessions);
+        rows = await db.select().from(userSessions);
         break;
       case "sessions":
         // Handle sessions table separately since it may not follow standard schema
         try {
-          rows = await getDb().select().from(sessions);
+          rows = await db.select().from(sessions);
         } catch (err) {
           // If sessions table doesn't exist or isn't accessible, return empty
           rows = [];
@@ -1880,14 +1880,14 @@ export class DatabaseStorage implements IStorage {
 
   async clearAllData(): Promise<void> {
     // Clear in reverse order to handle foreign key constraints
-    await getDb().delete(applications);
-    await getDb().delete(savedJobs);
-    await getDb().delete(jobAlerts);
-    await getDb().delete(jobs);
-    await getDb().delete(categories);
-    await getDb().delete(employers);
-    await getDb().delete(userSessions);
-    await getDb().delete(users);
+    await db.delete(applications);
+    await db.delete(savedJobs);
+    await db.delete(jobAlerts);
+    await db.delete(jobs);
+    await db.delete(categories);
+    await db.delete(employers);
+    await db.delete(userSessions);
+    await db.delete(users);
   }
 
   async getPendingVerifications(): Promise<User[]> {
@@ -2302,4 +2302,5 @@ export class DatabaseStorage implements IStorage {
 }
 
 export const storage = new DatabaseStorage();
+
 
