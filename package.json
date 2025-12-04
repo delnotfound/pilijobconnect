@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx api/server/index.ts",
+    "dev:client": "vite",
     "build": "vite build",
     "start": "cross-env NODE_ENV=production node dist/index.js",
     "check": "tsc",
@@ -95,6 +96,7 @@
     "zod-validation-error": "^3.4.0"
   },
   "devDependencies": {
+    "@netlify/functions": "^5.1.0",
     "@replit/vite-plugin-cartographer": "^0.2.7",
     "@replit/vite-plugin-runtime-error-modal": "^0.0.3",
     "@tailwindcss/typography": "^0.5.15",

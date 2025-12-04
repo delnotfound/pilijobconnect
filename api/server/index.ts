@@ -21,12 +21,15 @@ app.use((req, res, next) => {
   if (process.env.VERCEL_URL) {
     allowedOrigins.push(`https://${process.env.VERCEL_URL}`);
   }
+  if (process.env.NETLIFY_SITE_URL) {
+    allowedOrigins.push(process.env.NETLIFY_SITE_URL);
+  }
   if (process.env.NETLIFY_URL) {
     allowedOrigins.push(`https://${process.env.NETLIFY_URL}`);
   }
 
   const origin = req.headers.origin;
-  if (!origin || allowedOrigins.some((allowed) => origin.startsWith(allowed))) {
+  if (!origin || allowedOrigins.some((allowed) => origin.includes(allowed))) {
     res.header("Access-Control-Allow-Origin", (origin as string) || "*");
     res.header("Access-Control-Allow-Credentials", "true");
     res.header(
