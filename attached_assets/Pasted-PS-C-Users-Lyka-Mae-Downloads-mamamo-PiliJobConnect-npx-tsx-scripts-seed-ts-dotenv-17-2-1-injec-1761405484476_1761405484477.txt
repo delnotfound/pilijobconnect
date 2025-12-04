@@ -1,0 +1,55 @@
+PS C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect> npx tsx scripts/seed.ts
+[dotenv@17.2.1] injecting env (5) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+Starting database seeding...
+Starting database seeding...
+Error seeding database: DrizzleQueryError: Failed query: insert into "users" ("id", "email", "password_hash", "first_name", "middle_name", "last_name", "role", "phone", "address", "profile_image", "skills", "desired_roles", "experience_level", "preferred_location", "is_active", "is_verified", "verification_status", "barangay_permit", "business_permit", "last_login_at", "created_at", "updated_at") values (default, $1, $2, $3, default, $4, $5, $6, $7, default, default, default, default, default, $8, $9, default, default, default, default, default, default) returning "id", "email", "password_hash", "first_name", "middle_name", "last_name", "role", "phone", "address", "profile_image", "skills", "desired_roles", "experience_level", "preferred_location", "is_active", "is_verified", "verification_status", "barangay_permit", "business_permit", "last_login_at", "created_at", "updated_at"
+params: admin@pilijobs.com,$2b$10$lTl/Rrhj/x20sVig.RCnROt3klikISi8H8dKCwIp.zwi..r5jIlNm,Admin,User,admin,+63912345678,Pili Centro,true,true
+    at NeonPreparedQuery.queryWithCache (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\pg-core\session.ts:74:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\neon-serverless\session.ts:152:18)
+    at async seedDatabase (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\server\seed.ts:20:25)
+    at async main (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\scripts\seed.ts:11:5) {
+  query: 'insert into "users" ("id", "email", "password_hash", "first_name", "middle_name", "last_name", "role", "phone", "address", "profile_image", "skills", "desired_roles", "experience_level", "preferred_location", "is_active", "is_verified", "verification_status", "barangay_permit", "business_permit", "last_login_at", "created_at", "updated_at") values (default, $1, $2, $3, default, $4, $5, $6, $7, default, default, default, default, default, $8, $9, default, default, default, default, default, default) returning "id", "email", "password_hash", "first_name", "middle_name", "last_name", "role", "phone", "address", "profile_image", "skills", "desired_roles", "experience_level", "preferred_location", "is_active", "is_verified", "verification_status", "barangay_permit", "business_permit", "last_login_at", "created_at", "updated_at"',
+  params: [
+    'admin@pilijobs.com',
+    '$2b$10$lTl/Rrhj/x20sVig.RCnROt3klikISi8H8dKCwIp.zwi..r5jIlNm',
+    'Admin',
+    'User',
+    'admin',
+    '+63912345678',
+    'Pili Centro',
+    true,
+    true
+  ],
+  cause: error: duplicate key value violates unique constraint "users_email_unique"
+      at file:///C:/Users/Lyka%20Mae/Downloads/mamamo/PiliJobConnect/node_modules/@neondatabase/serverless/index.mjs:1345:74
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+      at async <anonymous> (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\neon-serverless\session.ts:153:11)
+      at async NeonPreparedQuery.queryWithCache (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\pg-core\session.ts:72:12)
+      at async NeonPreparedQuery.execute (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\neon-serverless\session.ts:152:18)
+      at async seedDatabase (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\server\seed.ts:20:25)
+      at async main (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\scripts\seed.ts:11:5) {
+    length: 216,
+    severity: 'ERROR',
+    code: '23505',
+    detail: 'Key (email)=(admin@pilijobs.com) already exists.',
+    hint: undefined,
+    position: undefined,
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: 'public',
+    table: 'users',
+    column: undefined,
+    dataType: undefined,
+    constraint: 'users_email_unique',
+    file: 'nbtinsert.c',
+    line: '667',
+    routine: '_bt_check_unique'
+  }
+}
+Seeding failed: Error: Failed to seed database
+    at seedDatabase (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\server\seed.ts:568:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async main (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\scripts\seed.ts:11:5)
+PS C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect> 

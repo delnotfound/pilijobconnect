@@ -1,0 +1,33 @@
+export const PILI_BARANGAYS = [
+  "Anayan",
+  "Bagong Sirang",
+  "Binanwaanan",
+  "Binobong",
+  "Cadlan",
+  "Caroyroyan",
+  "Curry",
+  "Del Rosario",
+  "Himaao",
+  "La Purisima",
+  "New San Roque",
+  "Old San Roque",
+  "Palestina",
+  "Pawili",
+  "Sagrada",
+  "Sagurong",
+  "San Agustin",
+  "San Antonio",
+  "San Isidro",
+  "San Jose",
+  "San Juan",
+  "San Vicente",
+  "Santiago",
+  "Santo Niño",
+  "Tagbong",
+  "Tinangis",
+];
+
+export const LOCATION_OPTIONS = [
+  "Pili (All Areas)",
+  ...PILI_BARANGAYS.map((barangay) => `${barangay}, Pili`),
+];

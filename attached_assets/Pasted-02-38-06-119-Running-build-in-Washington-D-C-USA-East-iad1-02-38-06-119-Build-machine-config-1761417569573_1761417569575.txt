@@ -1,0 +1,97 @@
+02:38:06.119 Running build in Washington, D.C., USA (East) – iad1
+02:38:06.119 Build machine configuration: 4 cores, 8 GB
+02:38:06.140 Cloning github.com/Michiaki16/pilijobconnect (Branch: main, Commit: 41d4b9b)
+02:38:06.260 Previous build caches not available
+02:38:07.695 Cloning completed: 1.555s
+02:38:07.740 Found .vercelignore
+02:38:07.750 Removed 30 ignored files defined in .vercelignore
+02:38:07.750   /.env
+02:38:07.750   /.git/config
+02:38:07.750   /.git/description
+02:38:07.750   /.git/FETCH_HEAD
+02:38:07.750   /.git/HEAD
+02:38:07.750   /.git/hooks/applypatch-msg.sample
+02:38:07.750   /.git/hooks/commit-msg.sample
+02:38:07.750   /.git/hooks/fsmonitor-watchman.sample
+02:38:07.750   /.git/hooks/post-update.sample
+02:38:07.750   /.git/hooks/pre-applypatch.sample
+02:38:08.003 Running "vercel build"
+02:38:08.405 Vercel CLI 48.1.6
+02:38:09.179 Installing dependencies...
+02:38:13.451 npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+02:38:14.417 npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+02:38:14.513 npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+02:38:21.170 
+02:38:21.170 added 677 packages in 12s
+02:38:21.171 
+02:38:21.171 86 packages are looking for funding
+02:38:21.171   run `npm fund` for details
+02:38:21.333 
+02:38:21.333 > rest-express@1.0.0 build
+02:38:21.333 > vite build
+02:38:21.333 
+02:38:21.639 [36mvite v5.4.19 [32mbuilding for production...[36m[39m
+02:38:21.640 [33m
+02:38:21.640 [1m(!)[22m outDir [37m[2m/vercel/path0/dist[22m[33m is not inside project root and will not be emptied.
+02:38:21.640 Use --emptyOutDir to override.
+02:38:21.640 [39m
+02:38:21.688 transforming...
+02:38:29.668 [32m✓[39m 2571 modules transformed.
+02:38:30.469 rendering chunks...
+02:38:30.489 computing gzip size...
+02:38:30.523 [2m../dist/[22m[32mindex.html                     [39m[1m[2m    0.38 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m
+02:38:30.524 [2m../dist/[22m[2massets/[22m[32mPili-mGVUvHRg.jpeg      [39m[1m[2m  338.85 kB[22m[1m[22m
+02:38:30.524 [2m../dist/[22m[2massets/[22m[32mpili-logo-7DjCvxGi.png  [39m[1m[2m  528.61 kB[22m[1m[22m
+02:38:30.524 [2m../dist/[22m[2massets/[22m[35mindex-CF9D-M_n.css      [39m[1m[2m   85.52 kB[22m[1m[22m[2m │ gzip:  13.88 kB[22m
+02:38:30.524 [2m../dist/[22m[2massets/[22m[36mindex-6o0IeAJB.js       [39m[1m[33m1,388.27 kB[39m[22m[2m │ gzip: 352.36 kB[22m
+02:38:30.524 [33m
+02:38:30.524 (!) Some chunks are larger than 500 kB after minification. Consider:
+02:38:30.525 - Using dynamic import() to code-split the application
+02:38:30.525 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+02:38:30.525 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+02:38:30.525 [32m✓ built in 8.86s[39m
+02:38:30.886 Using TypeScript 5.6.3 (local user-provided)
+02:38:37.656 Using TypeScript 5.6.3 (local user-provided)
+02:38:37.927 Using TypeScript 5.6.3 (local user-provided)
+02:38:38.167 Using TypeScript 5.6.3 (local user-provided)
+02:38:38.724 Using TypeScript 5.6.3 (local user-provided)
+02:38:40.212 api/server/storage.ts(27,8): error TS2305: Module '"@shared/schema"' has no exported member 'RegisterUser'.
+02:38:40.212 api/server/storage.ts(28,8): error TS2724: '"@shared/schema"' has no exported member named 'UserSession'. Did you mean 'userSessions'?
+02:38:40.212 api/server/storage.ts(29,8): error TS2305: Module '"@shared/schema"' has no exported member 'InsertUserSession'.
+02:38:40.212 api/server/storage.ts(320,20): error TS2339: Property 'changes' does not exist on type 'QueryResult<never>'.
+02:38:40.213 api/server/storage.ts(500,5): error TS2322: Type '{ id: number; jobId: number; applicantId: number | null; firstName: string; lastName: string; email: string; phone: string; address: string | null; coverLetter: string | null; resume: string | null; ... 5 more ...; jobTitle: string; }[]' is not assignable to type '({ id: number; email: string; firstName: string; middleName: string | null; lastName: string; phone: string; address: string | null; updatedAt: Date; jobId: number; applicantId: number | null; ... 6 more ...; appliedAt: Date; } & { ...; })[]'.
+02:38:40.213   Type '{ id: number; jobId: number; applicantId: number | null; firstName: string; lastName: string; email: string; phone: string; address: string | null; coverLetter: string | null; resume: string | null; ... 5 more ...; jobTitle: string; }' is not assignable to type '{ id: number; email: string; firstName: string; middleName: string | null; lastName: string; phone: string; address: string | null; updatedAt: Date; jobId: number; applicantId: number | null; ... 6 more ...; appliedAt: Date; } & { ...; }'.
+02:38:40.213     Type '{ id: number; jobId: number; applicantId: number | null; firstName: string; lastName: string; email: string; phone: string; address: string | null; coverLetter: string | null; resume: string | null; ... 5 more ...; jobTitle: string; }' is missing the following properties from type '{ id: number; email: string; firstName: string; middleName: string | null; lastName: string; phone: string; address: string | null; updatedAt: Date; jobId: number; applicantId: number | null; ... 6 more ...; appliedAt: Date; }': middleName, channelId
+02:38:40.213 api/server/storage.ts(505,5): error TS2322: Type '{ id: number; jobId: number; applicantId: number | null; firstName: string; lastName: string; email: string; phone: string; address: string | null; coverLetter: string | null; resume: string | null; ... 4 more ...; updatedAt: Date; }[]' is not assignable to type '{ id: number; email: string; firstName: string; middleName: string | null; lastName: string; phone: string; address: string | null; updatedAt: Date; jobId: number; applicantId: number | null; ... 6 more ...; appliedAt: Date; }[]'.
+02:38:40.214   Type '{ id: number; jobId: number; applicantId: number | null; firstName: string; lastName: string; email: string; phone: string; address: string | null; coverLetter: string | null; resume: string | null; ... 4 more ...; updatedAt: Date; }' is missing the following properties from type '{ id: number; email: string; firstName: string; middleName: string | null; lastName: string; phone: string; address: string | null; updatedAt: Date; jobId: number; applicantId: number | null; ... 6 more ...; appliedAt: Date; }': middleName, channelId
+02:38:40.214 api/server/storage.ts(858,11): error TS2739: Type 'QueryResult<never>' is missing the following properties from type 'CustomRunResult': changes, lastInsertRowid
+02:38:40.214 api/server/storage.ts(922,5): error TS2322: Type '{ id: number; jobId: number; applicantId: number | null; firstName: string; lastName: string; email: string; phone: string; address: string | null; coverLetter: string | null; resume: string | null; ... 5 more ...; job: { ...; }; }[]' is not assignable to type '({ id: number; email: string; firstName: string; middleName: string | null; lastName: string; phone: string; address: string | null; updatedAt: Date; jobId: number; applicantId: number | null; ... 6 more ...; appliedAt: Date; } & { ...; })[]'.
+02:38:40.214   Type '{ id: number; jobId: number; applicantId: number | null; firstName: string; lastName: string; email: string; phone: string; address: string | null; coverLetter: string | null; resume: string | null; ... 5 more ...; job: { ...; }; }' is not assignable to type '{ id: number; email: string; firstName: string; middleName: string | null; lastName: string; phone: string; address: string | null; updatedAt: Date; jobId: number; applicantId: number | null; ... 6 more ...; appliedAt: Date; } & { ...; }'.
+02:38:40.215     Type '{ id: number; jobId: number; applicantId: number | null; firstName: string; lastName: string; email: string; phone: string; address: string | null; coverLetter: string | null; resume: string | null; ... 5 more ...; job: { ...; }; }' is missing the following properties from type '{ id: number; email: string; firstName: string; middleName: string | null; lastName: string; phone: string; address: string | null; updatedAt: Date; jobId: number; applicantId: number | null; ... 6 more ...; appliedAt: Date; }': middleName, channelId
+02:38:40.216 api/server/storage.ts(1025,20): error TS2339: Property 'changes' does not exist on type 'QueryResult<never>'.
+02:38:40.216 api/server/storage.ts(1042,19): error TS2339: Property 'changes' does not exist on type 'QueryResult<never>'.
+02:38:40.216 api/server/storage.ts(1109,19): error TS2339: Property 'changes' does not exist on type 'QueryResult<never>'.
+02:38:40.216 api/server/storage.ts(1499,9): error TS2416: Property 'getAllApplicationsAdmin' in type 'DatabaseStorage' is not assignable to the same property in base type 'IStorage'.
+02:38:40.216   Type '() => Promise<{ id: number; firstName: string; lastName: string; email: string; phone: string; address: string | null; coverLetter: string | null; status: string; smsNotificationSent: boolean; appliedAt: Date; ... 5 more ...; updatedAt: Date; }[]>' is not assignable to type '() => Promise<({ id: number; email: string; firstName: string; middleName: string | null; lastName: string; phone: string; address: string | null; updatedAt: Date; jobId: number; applicantId: number | null; ... 6 more ...; appliedAt: Date; } & { ...; })[]>'.
+02:38:40.216     Type 'Promise<{ id: number; firstName: string; lastName: string; email: string; phone: string; address: string | null; coverLetter: string | null; status: string; smsNotificationSent: boolean; appliedAt: Date; ... 5 more ...; updatedAt: Date; }[]>' is not assignable to type 'Promise<({ id: number; email: string; firstName: string; middleName: string | null; lastName: string; phone: string; address: string | null; updatedAt: Date; jobId: number; applicantId: number | null; ... 6 more ...; appliedAt: Date; } & { ...; })[]>'.
+02:38:40.216       Type '{ id: number; firstName: string; lastName: string; email: string; phone: string; address: string | null; coverLetter: string | null; status: string; smsNotificationSent: boolean; appliedAt: Date; ... 5 more ...; updatedAt: Date; }[]' is not assignable to type '({ id: number; email: string; firstName: string; middleName: string | null; lastName: string; phone: string; address: string | null; updatedAt: Date; jobId: number; applicantId: number | null; ... 6 more ...; appliedAt: Date; } & { ...; })[]'.
+02:38:40.216         Type '{ id: number; firstName: string; lastName: string; email: string; phone: string; address: string | null; coverLetter: string | null; status: string; smsNotificationSent: boolean; appliedAt: Date; ... 5 more ...; updatedAt: Date; }' is not assignable to type '{ id: number; email: string; firstName: string; middleName: string | null; lastName: string; phone: string; address: string | null; updatedAt: Date; jobId: number; applicantId: number | null; ... 6 more ...; appliedAt: Date; } & { ...; }'.
+02:38:40.216           Type '{ id: number; firstName: string; lastName: string; email: string; phone: string; address: string | null; coverLetter: string | null; status: string; smsNotificationSent: boolean; appliedAt: Date; ... 5 more ...; updatedAt: Date; }' is missing the following properties from type '{ id: number; email: string; firstName: string; middleName: string | null; lastName: string; phone: string; address: string | null; updatedAt: Date; jobId: number; applicantId: number | null; ... 6 more ...; appliedAt: Date; }': middleName, channelId
+02:38:40.216 api/server/storage.ts(1560,9): error TS7034: Variable 'rows' implicitly has type 'any[]' in some locations where its type cannot be determined.
+02:38:40.216 api/server/storage.ts(1598,41): error TS2304: Cannot find name 'sessions'.
+02:38:40.216 api/server/storage.ts(1605,17): error TS7005: Variable 'rows' implicitly has an 'any[]' type.
+02:38:40.216 api/server/storage.ts(1606,50): error TS7005: Variable 'rows' implicitly has an 'any[]' type.
+02:38:40.216 api/server/storage.ts(1671,5): error TS2322: Type '{ id: number; jobId: number; applicantId: number | null; firstName: string; lastName: string; email: string; phone: string; address: string | null; coverLetter: string | null; resume: string | null; ... 5 more ...; job: { ...; }; }[]' is not assignable to type '({ id: number; email: string; firstName: string; middleName: string | null; lastName: string; phone: string; address: string | null; updatedAt: Date; jobId: number; applicantId: number | null; ... 6 more ...; appliedAt: Date; } & { ...; })[]'.
+02:38:40.217   Type '{ id: number; jobId: number; applicantId: number | null; firstName: string; lastName: string; email: string; phone: string; address: string | null; coverLetter: string | null; resume: string | null; ... 5 more ...; job: { ...; }; }' is not assignable to type '{ id: number; email: string; firstName: string; middleName: string | null; lastName: string; phone: string; address: string | null; updatedAt: Date; jobId: number; applicantId: number | null; ... 6 more ...; appliedAt: Date; } & { ...; }'.
+02:38:40.217     Type '{ id: number; jobId: number; applicantId: number | null; firstName: string; lastName: string; email: string; phone: string; address: string | null; coverLetter: string | null; resume: string | null; ... 5 more ...; job: { ...; }; }' is missing the following properties from type '{ id: number; email: string; firstName: string; middleName: string | null; lastName: string; phone: string; address: string | null; updatedAt: Date; jobId: number; applicantId: number | null; ... 6 more ...; appliedAt: Date; }': middleName, channelId
+02:38:40.217 
+02:38:42.151 Using TypeScript 5.6.3 (local user-provided)
+02:38:52.676 Using TypeScript 5.6.3 (local user-provided)
+02:38:54.460 Using TypeScript 5.6.3 (local user-provided)
+02:38:55.052 Using TypeScript 5.6.3 (local user-provided)
+02:38:55.702 Using TypeScript 5.6.3 (local user-provided)
+02:38:55.830 Using TypeScript 5.6.3 (local user-provided)
+02:39:04.500 Using TypeScript 5.6.3 (local user-provided)
+02:39:07.538 Build Completed in /vercel/output [58s]
+02:39:08.165 Deploying outputs...
+02:39:12.912 Warning: Provided `memory` setting in `vercel.json` is ignored on Active CPU billing. You can safely remove this setting from your configuration. Learn more: https://vercel.com/docs/fluid-compute/pricing

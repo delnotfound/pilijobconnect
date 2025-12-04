@@ -1,0 +1,80 @@
+    at SQLiteSelectBase.execute (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\sqlite-core\query-builders\select.ts:962:15)
+    at SQLiteSelectBase.then (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\query-promise.ts:31:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  code: 'SQLITE_ERROR'
+}
+2:53:45 PM [express] GET /api/jobs 500 in 3ms :: {"message":"Failed to fetch jobs"}
+2:53:45 PM [express] GET /api/auth/me 401 in 1ms :: {"message":"Authentication required"}
+Search parameters: {
+  q: 'as',
+  location: undefined,
+  type: undefined,
+  category: undefined,
+  salary: undefined,
+  jobTypes: []
+}
+Error fetching jobs: SqliteError: near "ilike": syntax error
+    at Database.prepare (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\better-sqlite3\lib\methods\wrappers.js:5:21)
+    at BetterSQLiteSession.prepareQuery (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\better-sqlite3\session.ts:60:28)
+    at BetterSQLiteSession.prepareOneTimeQuery (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\sqlite-core\session.ts:251:15)
+    at SQLiteSelectBase._prepare (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\sqlite-core\query-builders\select.ts:916:85)
+    at SQLiteSelectBase.all (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\sqlite-core\query-builders\select.ts:950:15)
+    at SQLiteSelectBase.execute (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\sqlite-core\query-builders\select.ts:962:15)
+    at SQLiteSelectBase.then (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\query-promise.ts:31:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  code: 'SQLITE_ERROR'
+}
+2:53:46 PM [express] GET /api/jobs 500 in 2ms :: {"message":"Failed to fetch jobs"}
+2:53:46 PM [express] GET /api/auth/me 401 in 1ms :: {"message":"Authentication required"}
+Search parameters: {
+  q: 'a',
+  location: undefined,
+  type: undefined,
+  category: undefined,
+  salary: undefined,
+  jobTypes: []
+}
+Error fetching jobs: SqliteError: near "ilike": syntax error
+    at Database.prepare (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\better-sqlite3\lib\methods\wrappers.js:5:21)
+    at BetterSQLiteSession.prepareQuery (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\better-sqlite3\session.ts:60:28)
+    at BetterSQLiteSession.prepareOneTimeQuery (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\sqlite-core\session.ts:251:15)
+    at SQLiteSelectBase._prepare (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\sqlite-core\query-builders\select.ts:916:85)
+    at SQLiteSelectBase.all (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\sqlite-core\query-builders\select.ts:950:15)
+    at SQLiteSelectBase.execute (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\sqlite-core\query-builders\select.ts:962:15)
+    at SQLiteSelectBase.then (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\query-promise.ts:31:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  code: 'SQLITE_ERROR'
+}
+2:53:47 PM [express] GET /api/jobs 500 in 2ms :: {"message":"Failed to fetch jobs"}
+2:53:47 PM [express] GET /api/auth/me 401 in 0ms :: {"message":"Authentication required"}
+Search parameters: {
+  q: undefined,
+  location: undefined,
+  type: undefined,
+  category: undefined,
+  salary: undefined,
+  jobTypes: [ 'Full-time' ]
+}
+2:53:49 PM [express] GET /api/jobs 200 in 7ms :: {"jobs":[{"id":23,"title":"Registered Nurse","compa…
+2:53:49 PM [express] GET /api/auth/me 401 in 1ms :: {"message":"Authentication required"}
+Search parameters: {
+  q: undefined,
+  location: 'Pili Centro',
+  type: undefined,
+  category: undefined,
+  salary: undefined,
+  jobTypes: []
+}
+Error fetching jobs: SqliteError: near "ilike": syntax error
+    at Database.prepare (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\better-sqlite3\lib\methods\wrappers.js:5:21)
+    at BetterSQLiteSession.prepareQuery (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\better-sqlite3\session.ts:60:28)
+    at BetterSQLiteSession.prepareOneTimeQuery (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\sqlite-core\session.ts:251:15)
+    at SQLiteSelectBase._prepare (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\sqlite-core\query-builders\select.ts:916:85)
+    at SQLiteSelectBase.all (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\sqlite-core\query-builders\select.ts:950:15)
+    at SQLiteSelectBase.execute (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\sqlite-core\query-builders\select.ts:962:15)
+    at SQLiteSelectBase.then (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\query-promise.ts:31:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  code: 'SQLITE_ERROR'
+}
+2:54:04 PM [express] GET /api/jobs 500 in 2ms :: {"message":"Failed to fetch jobs"}
+2:54:04 PM [express] GET /api/auth/me 401 in 1ms :: {"message":"Authentication required"}

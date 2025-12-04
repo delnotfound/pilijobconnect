@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": null,
+  "regions": ["sin1"],
+  "functions": {
+    "api/[...path].ts": {
+      "maxDuration": 10,
+      "includeFiles": "api/server/**"
+    }
+  }
+}
