@@ -650,15 +650,15 @@ export class DatabaseStorage implements IStorage {
     const searchSkills = filters.skills.map((s) => s.toLowerCase().trim());
 
     // Score each candidate
-    const scoredCandidates = jobSeekers.map((candidate) => {
+    const scoredCandidates = jobSeekers.map((candidate: any) => {
       const candidateSkills = (candidate.skills || "")
         .toLowerCase()
         .split(",")
-        .map((s) => s.trim());
+        .map((s: any) => s.trim());
       const candidateRoles = (candidate.desiredRoles || "")
         .toLowerCase()
         .split(",")
-        .map((r) => r.trim());
+        .map((r: any) => r.trim());
 
       // Combine all candidate text for comprehensive matching
       const allCandidateText = `${candidate.skills || ""} ${
@@ -739,8 +739,8 @@ export class DatabaseStorage implements IStorage {
 
     // Filter candidates with at least one matching skill and sort by score
     return scoredCandidates
-      .filter((candidate) => candidate.matchingSkills.length > 0)
-      .sort((a, b) => b.matchScore - a.matchScore);
+      .filter((candidate: any) => candidate.matchingSkills.length > 0)
+      .sort((a: any, b: any) => b.matchScore - a.matchScore);
   }
 
   // Job Matching Methods
@@ -1289,7 +1289,7 @@ export class DatabaseStorage implements IStorage {
       .select({ count: sql<number>`count(*)` })
       .from(applications)
       .where(gte(applications.appliedAt, today))
-      .then((rows) => rows[0]?.count || 0);
+      .then((rows: any) => rows[0]?.count || 0);
 
     // Get category counts
     const categoriesWithCounts = await db
@@ -1371,8 +1371,8 @@ export class DatabaseStorage implements IStorage {
 
     // Find the most recent activity date to use as "today"
     const allDates = [
-      ...recentJobs.map((j) => j.postedAt),
-      ...recentApplications.map((a) => a.appliedAt),
+      ...recentJobs.map((j: any) => j.postedAt),
+      ...recentApplications.map((a: any) => a.appliedAt),
       ...recentUsers.map((u) => u.createdAt),
     ].filter(Boolean);
 

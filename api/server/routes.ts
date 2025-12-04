@@ -22,7 +22,7 @@ import {
   requireEmployer,
   requireAdmin,
   type AuthenticatedRequest,
-} from "./auth.ts";
+} from "./auth.js";
 import {
   insertJobSchema,
   insertApplicationSchema,
@@ -1396,7 +1396,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ["JOBS BY CATEGORY - BAR CHART DATA"],
           [""],
           ["Category", "Job Count", "Application Count", "Avg Salary"],
-          ...(categoryStats || []).map((c) => [
+          ...(categoryStats || []).map((c: any) => [
             c.category,
             c.jobCount,
             c.applicationCount,
@@ -1421,11 +1421,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ["JOB TYPES DISTRIBUTION - PIE CHART DATA"],
           [""],
           ["Employment Type", "Count", "Percentage"],
-          ...(jobTypeStats || []).map((t) => [t.type, t.count, t.percentage]),
+          ...(jobTypeStats || []).map((t: any) => [t.type, t.count, t.percentage]),
           [""],
           [
             "TOTAL",
-            (jobTypeStats || []).reduce((sum, t) => sum + t.count, 0),
+            (jobTypeStats || []).reduce((sum: any, t: any) => sum + t.count, 0),
             "100%",
           ],
         ];
