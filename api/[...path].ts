@@ -31,13 +31,15 @@ async function initializeApp() {
   });
 
   try {
+    console.log("[init] Starting route registration...");
     // Register all routes
     await registerRoutes(newApp);
+    console.log("[init] Routes registered successfully");
     
     initialized = true;
     app = newApp;
   } catch (error) {
-    console.error("Failed to initialize app:", error);
+    console.error("[init] Error during registration:", error);
     throw error;
   }
 
@@ -49,7 +51,11 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     const application = await initializeApp();
     return application(req as any, res as any);
   } catch (error) {
-    console.error("Handler error:", error);
-    res.status(500).json({ error: "Server initialization failed" });
+    console.error("[handler] Error:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    return res.status(500).json({ 
+      error: "Internal server error",
+      message: message
+    });
   }
 };

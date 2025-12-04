@@ -1,7 +1,6 @@
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import { neonConfig, Pool } from '@neondatabase/serverless';
 import * as schema from "@shared/schema";
-import ws from 'ws';
 
 const databaseUrl = process.env.DATABASE_URL?.trim();
 
@@ -18,9 +17,8 @@ try {
 }
 
 // Configure for serverless environment
-neonConfig.webSocketConstructor = ws;
+// In Vercel serverless, we use fetch-based connections instead of WebSocket
 neonConfig.poolQueryViaFetch = true;
-neonConfig.fetchConnectionCache = true;
 
 // Create pool with serverless-optimized settings
 export const pool = new Pool({ 
