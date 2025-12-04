@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import { neonConfig, Pool } from '@neondatabase/serverless';
-import * as schema from "@shared/schema";
+import * as schema from "../../shared/schema.js";
 
 const databaseUrl = process.env.DATABASE_URL?.trim();
 
@@ -20,20 +20,20 @@ try {
 neonConfig.poolQueryViaFetch = true;
 
 // Don't create the pool immediately - create it lazily
-let pool: Pool | null = null;
+let poolInstance: Pool | null = null;
 let dbInstance: any = null;
 
 function initializePool() {
-  if (!pool) {
+  if (!poolInstance) {
     console.log('[db] Initializing connection pool...');
-    pool = new Pool({ 
+    poolInstance = new Pool({ 
       connectionString: databaseUrl,
       max: 1,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 30000,
     });
   }
-  return pool;
+  return poolInstance;
 }
 
 function initializeDb() {

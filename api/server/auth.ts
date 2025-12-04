@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import { db } from "./db.js";
-import { users, userSessions, type User } from "@shared/schema";
+import { users, userSessions, type User } from "../../shared/schema.js";
 import { eq } from "drizzle-orm";
 
 const JWT_SECRET = process.env.JWT_SECRET || "pili-jobs-dev-secret-key-2025";
@@ -58,7 +58,7 @@ export async function validateSession(sessionId: string): Promise<User | null> {
 
     if (!session || session.expiresAt < new Date()) {
       if (session) {
-        await getDb()
+        await db
           .delete(userSessions)
           .where(eq(userSessions.id, sessionId));
       }

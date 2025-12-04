@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { sqliteTable } from "drizzle-orm/sqlite-core";
 import Database from "better-sqlite3";
-import * as schema from "@shared/schema";
+import * as schema from "../../shared/schema.js";
 
 // Use SQLite for local development
 const sqlite = new Database("./pili_jobs.db");

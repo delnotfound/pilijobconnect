@@ -34,7 +34,7 @@ import {
   registerUserSchema,
   loginUserSchema,
   type Job,
-} from "@shared/schema";
+} from "../../shared/schema.js";
 import { z } from "zod";
 import * as XLSX from "xlsx";
 

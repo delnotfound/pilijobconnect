@@ -6,7 +6,7 @@ import {
   users,
   categories,
   employers,
-} from "@shared/schema";
+} from "../../shared/schema.js";
 import { eq } from "drizzle-orm";
 
 export async function seedDatabase() {

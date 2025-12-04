@@ -28,7 +28,7 @@ import {
   type RegisterUser,
   type UserSession,
   type InsertUserSession,
-} from "@shared/schema";
+} from "../../shared/schema.js";
 import { db } from "./db";
 import {
   eq,
@@ -1373,7 +1373,7 @@ export class DatabaseStorage implements IStorage {
     const allDates = [
       ...recentJobs.map((j: any) => j.postedAt),
       ...recentApplications.map((a: any) => a.appliedAt),
-      ...recentUsers.map((u) => u.createdAt),
+      ...recentUsers.map((u: any) => u.createdAt),
     ].filter(Boolean);
 
     let applicationsToday = 0;
