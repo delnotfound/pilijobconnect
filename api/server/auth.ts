@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-import { db } from "./db.js";
+import { getDb } from "./db.js";
 import { users, userSessions, type User } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
@@ -37,7 +37,7 @@ export async function createSession(userId: number): Promise<string> {
   const sessionId = generateToken({ userId, type: "session" });
   const expiresAt = new Date(Date.now() + SESSION_DURATION);
   
-  await db.insert(userSessions).values({
+  await getDb().insert(userSessions).values({
     id: sessionId,
     userId,
     expiresAt,
@@ -55,7 +55,7 @@ export async function validateSession(sessionId: string): Promise<User | null> {
     
     if (!session || session.expiresAt < new Date()) {
       if (session) {
-        await db.delete(userSessions).where(eq(userSessions.id, sessionId));
+        await getDb().delete(userSessions).where(eq(userSessions.id, sessionId));
       }
       return null;
     }
@@ -72,7 +72,7 @@ export async function validateSession(sessionId: string): Promise<User | null> {
 }
 
 export async function destroySession(sessionId: string): Promise<void> {
-  await db.delete(userSessions).where(eq(userSessions.id, sessionId));
+  await getDb().delete(userSessions).where(eq(userSessions.id, sessionId));
 }
 
 export const requireAuth = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {

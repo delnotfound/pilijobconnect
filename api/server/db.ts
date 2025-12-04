@@ -17,15 +17,55 @@ try {
 }
 
 // Configure for serverless environment
-// In Vercel serverless, we use fetch-based connections instead of WebSocket
 neonConfig.poolQueryViaFetch = true;
 
-// Create pool with serverless-optimized settings
-export const pool = new Pool({ 
-  connectionString: databaseUrl,
-  max: 1, // Limit connections in serverless
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 30000, // Increased from 10s to 30s
+// Don't create the pool immediately - create it lazily
+let pool: Pool | null = null;
+let db: any = null;
+
+function initializePool() {
+  if (!pool) {
+    console.log('[db] Initializing connection pool...');
+    pool = new Pool({ 
+      connectionString: databaseUrl,
+      max: 1,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 30000,
+    });
+  }
+  return pool;
+}
+
+function initializeDb() {
+  if (!db) {
+    const p = initializePool();
+    db = drizzle(p, { schema });
+  }
+  return db;
+}
+
+// Export getters that initialize on first use
+export const getPool = () => initializePool();
+export const getDb = () => initializeDb();
+
+// For backward compatibility - these will trigger lazy initialization
+Object.defineProperty(globalThis, '__db__', {
+  value: null,
+  writable: true,
+  configurable: true
 });
 
-export const db = drizzle(pool, { schema });
+// Create a proxy object that initializes db on access
+export const db = new Proxy({}, {
+  get: (target, prop) => {
+    const actualDb = initializeDb();
+    return (actualDb as any)[prop];
+  }
+});
+
+export const pool = new Proxy({}, {
+  get: (target, prop) => {
+    const actualPool = initializePool();
+    return (actualPool as any)[prop];
+  }
+});
