@@ -1,7 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import express, { type Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
-import { registerRoutes } from "./server/routes.js";
 
 let appInitialized = false;
 let cachedApp: express.Application;
@@ -16,27 +15,6 @@ async function getOrCreateApp() {
   app.use(express.urlencoded({ extended: false, limit: "10mb" }));
   app.use(cookieParser());
 
-  // Add logging middleware
-  app.use((req, res, next) => {
-    const start = Date.now();
-    const originalJson = res.json;
-    const originalSend = res.send;
-
-    res.json = function (data: any) {
-      const duration = Date.now() - start;
-      console.log(`[API] ${req.method} ${req.path} ${res.statusCode} ${duration}ms`);
-      return originalJson.call(this, data);
-    };
-
-    res.send = function (data: any) {
-      const duration = Date.now() - start;
-      console.log(`[API] ${req.method} ${req.path} ${res.statusCode} ${duration}ms`);
-      return originalSend.call(this, data);
-    };
-
-    next();
-  });
-
   // CORS middleware
   app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -49,31 +27,52 @@ async function getOrCreateApp() {
     next();
   });
 
-  try {
-    console.log("[App] Initializing routes...");
-    // Note: registerRoutes expects Express app, ignore the Server return type
-    await registerRoutes(app as any);
-    console.log("[App] Routes initialized successfully");
+  // Add logging middleware
+  app.use((req, res, next) => {
+    const start = Date.now();
+    const originalJson = res.json;
 
-    // 404 handler
+    res.json = function (data: any) {
+      const duration = Date.now() - start;
+      console.log(`[${req.method}] ${req.path} - ${res.statusCode} (${duration}ms)`);
+      return originalJson.call(this, data);
+    };
+
+    next();
+  });
+
+  try {
+    console.log("[registerRoutes] Starting...");
+    
+    // Dynamic import to avoid issues with module loading
+    const { registerRoutes } = await import("./server/routes.js");
+    const result = await registerRoutes(app);
+    
+    console.log("[registerRoutes] Success - routes registered");
+    
+    // Only use the result if needed, but routes are already on app
+    if (result) {
+      console.log("[registerRoutes] HTTP server created");
+    }
+
+    // 404 handler - MUST be last
     app.use((req: Request, res: Response) => {
-      console.log(`[App] 404 - ${req.method} ${req.path}`);
+      console.log(`[404] ${req.method} ${req.path}`);
       res.status(404).json({ error: "Route not found", path: req.path });
     });
 
-    // Error handler
+    // Error handler - MUST be after all other middleware
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-      console.error("[App] Error:", err);
+      console.error(`[ERROR] ${err.message}`, err);
       const status = err.status || err.statusCode || 500;
-      const message = err.message || "Internal Server Error";
-      res.status(status).json({ error: message });
+      res.status(status).json({ error: err.message });
     });
 
     appInitialized = true;
     cachedApp = app;
-    console.log("[App] App ready");
+    console.log("[App] Ready for requests");
   } catch (error) {
-    console.error("[App] Initialization failed:", error);
+    console.error("[App] Fatal initialization error:", error);
     throw error;
   }
 
@@ -85,16 +84,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log(`[Handler] ${req.method} ${req.url}`);
     
     if (!process.env.DATABASE_URL) {
-      console.error("[Handler] DATABASE_URL not configured");
+      console.error("[Handler] DATABASE_URL is missing");
       return res.status(500).json({ error: "Database not configured" });
     }
 
     const app = await getOrCreateApp();
+    console.log("[Handler] App obtained, routing...");
+    
     return app(req as any, res as any);
   } catch (error) {
-    console.error("[Handler] Error:", error);
-    return res.status(500).json({
-      error: error instanceof Error ? error.message : "Internal server error",
-    });
+    console.error("[Handler] Error caught:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return res.status(500).json({ error: message });
   }
 }
