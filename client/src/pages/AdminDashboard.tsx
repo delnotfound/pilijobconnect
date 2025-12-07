@@ -303,26 +303,28 @@ export function AdminDashboard() {
                   title: "Exporting Analytics",
                   description: "Generating your Excel file...",
                 });
-                
-                const response = await fetch('/api/admin/export-analytics', {
-                  credentials: 'include',
+
+                const response = await fetch("/api/admin/export-analytics", {
+                  credentials: "include",
                 });
-                
+
                 if (!response.ok) {
                   const error = await response.json();
-                  throw new Error(error.message || 'Export failed');
+                  throw new Error(error.message || "Export failed");
                 }
-                
+
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
+                const a = document.createElement("a");
                 a.href = url;
-                a.download = `pili-jobs-analytics-${new Date().toISOString().split('T')[0]}.xlsx`;
+                a.download = `pili-jobs-analytics-${
+                  new Date().toISOString().split("T")[0]
+                }.xlsx`;
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
-                
+
                 toast({
                   title: "Export Successful",
                   description: "Your Excel file has been downloaded",
@@ -330,7 +332,10 @@ export function AdminDashboard() {
               } catch (error) {
                 toast({
                   title: "Export Failed",
-                  description: error instanceof Error ? error.message : "Failed to export analytics",
+                  description:
+                    error instanceof Error
+                      ? error.message
+                      : "Failed to export analytics",
                   variant: "destructive",
                 });
               }
@@ -457,18 +462,28 @@ export function AdminDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={categoryStats}>
+                <ResponsiveContainer width="100%" height={350}>
+                  <BarChart
+                    data={categoryStats}
+                    margin={{ bottom: 80, left: 10, right: 10 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="category" />
+                    <XAxis
+                      dataKey="category"
+                      angle={-45}
+                      textAnchor="end"
+                      height={100}
+                      interval={0}
+                      tick={{ fontSize: 12 }}
+                    />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="jobCount" fill="#8884d8" />
+                    <Legend />
+                    <Bar dataKey="jobCount" fill="#8884d8" name="Jobs Posted" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-
             {/* Job Type Distribution */}
             <Card>
               <CardHeader>
@@ -504,19 +519,31 @@ export function AdminDashboard() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-
             Application Trends
             <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle>Activity Trends</CardTitle>
                 <CardDescription>
-                  Jobs posted, Applications received, and User registrations over time (Last 30 days)
-                  - Job views are tracked in real-time
+                  Jobs posted, Applications received, and User registrations
+                  over time (Last 30 days) - Job views are tracked in real-time
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={trends && trends.length > 0 ? trends : [{ date: 'No Data', applications: 0, jobs: 0, users: 0 }]}>
+                  <AreaChart
+                    data={
+                      trends && trends.length > 0
+                        ? trends
+                        : [
+                            {
+                              date: "No Data",
+                              applications: 0,
+                              jobs: 0,
+                              users: 0,
+                            },
+                          ]
+                    }
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
                       dataKey="date"
@@ -524,10 +551,19 @@ export function AdminDashboard() {
                       angle={-45}
                       textAnchor="end"
                       height={80}
-                      label={{ value: 'Date', position: 'insideBottom', offset: -5 }}
+                      label={{
+                        value: "Date",
+                        position: "insideBottom",
+                        offset: -5,
+                      }}
                     />
                     <YAxis
-                      label={{ value: 'Count', angle: -90, position: 'insideLeft', offset: 10 }}
+                      label={{
+                        value: "Count",
+                        angle: -90,
+                        position: "insideLeft",
+                        offset: 10,
+                      }}
                     />
                     <Tooltip
                       labelStyle={{ color: "#333" }}
@@ -538,11 +574,14 @@ export function AdminDashboard() {
                       }}
                       formatter={(value, name) => {
                         const labels = {
-                          'applications': 'Applications',
-                          'jobs': 'Jobs Posted',
-                          'users': 'User Registrations'
+                          applications: "Applications",
+                          jobs: "Jobs Posted",
+                          users: "User Registrations",
                         };
-                        return [value, labels[name as keyof typeof labels] || name];
+                        return [
+                          value,
+                          labels[name as keyof typeof labels] || name,
+                        ];
                       }}
                     />
                     <Legend verticalAlign="top" height={36} />
@@ -576,9 +615,7 @@ export function AdminDashboard() {
                   </AreaChart>
                 </ResponsiveContainer>
                 {(!trends || trends.length === 0) && (
-                  <div className="flex items-center justify-center h-[300px] text-muted-foreground absolute inset-0">
-                    
-                  </div>
+                  <div className="flex items-center justify-center h-[300px] text-muted-foreground absolute inset-0"></div>
                 )}
               </CardContent>
             </Card>
@@ -588,7 +625,9 @@ export function AdminDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Placement Rate</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Placement Rate
+                </CardTitle>
                 <TrendingUp className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
@@ -596,7 +635,8 @@ export function AdminDashboard() {
                   {pesoStats?.placementRate || 0}%
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {pesoStats?.totalHired || 0} hired out of {pesoStats?.totalApplications || 0} applications
+                  {pesoStats?.totalHired || 0} hired out of{" "}
+                  {pesoStats?.totalApplications || 0} applications
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Percentage of applications that resulted in successful hiring
@@ -606,7 +646,9 @@ export function AdminDashboard() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Local Employment</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Local Employment
+                </CardTitle>
                 <MapPin className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
@@ -614,7 +656,8 @@ export function AdminDashboard() {
                   {pesoStats?.localEmploymentRate || 0}%
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {pesoStats?.totalLocalJobs || 0} local jobs out of {pesoStats?.totalJobs || 0} total
+                  {pesoStats?.totalLocalJobs || 0} local jobs out of{" "}
+                  {pesoStats?.totalJobs || 0} total
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Jobs located in Pili, Camarines Sur area
@@ -624,7 +667,9 @@ export function AdminDashboard() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Hired</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Hired
+                </CardTitle>
                 <UserCheck className="h-4 w-4 text-purple-500" />
               </CardHeader>
               <CardContent>
@@ -642,7 +687,9 @@ export function AdminDashboard() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Job Seekers</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Active Job Seekers
+                </CardTitle>
                 <Users className="h-4 w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
@@ -664,8 +711,9 @@ export function AdminDashboard() {
             <CardHeader>
               <CardTitle>Monthly Employment Trends (PESO Report)</CardTitle>
               <CardDescription>
-                Track monthly applications, hires, job postings, and new job seeker registrations. 
-                This data helps assess the employment landscape and PESO program effectiveness.
+                Track monthly applications, hires, job postings, and new job
+                seeker registrations. This data helps assess the employment
+                landscape and PESO program effectiveness.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -674,19 +722,23 @@ export function AdminDashboard() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis />
-                  <Tooltip 
+                  <Tooltip
                     formatter={(value, name) => {
                       const labels: Record<string, string> = {
-                        applications: 'Applications Received',
-                        hired: 'Successful Placements',
-                        jobs: 'Jobs Posted',
-                        newSeekers: 'New Job Seekers'
+                        applications: "Applications Received",
+                        hired: "Successful Placements",
+                        jobs: "Jobs Posted",
+                        newSeekers: "New Job Seekers",
                       };
                       return [value, labels[name as string] || name];
                     }}
                   />
                   <Legend />
-                  <Bar dataKey="applications" name="Applications" fill="#8884d8" />
+                  <Bar
+                    dataKey="applications"
+                    name="Applications"
+                    fill="#8884d8"
+                  />
                   <Bar dataKey="hired" name="Hired" fill="#82ca9d" />
                   <Bar dataKey="jobs" name="Jobs Posted" fill="#ffc658" />
                   <Bar dataKey="newSeekers" name="New Seekers" fill="#ff8042" />
@@ -694,8 +746,9 @@ export function AdminDashboard() {
               </ResponsiveContainer>
               <div className="mt-4 p-3 bg-muted/50 rounded-md">
                 <p className="text-sm text-muted-foreground">
-                  <strong>Insight:</strong> Compare applications vs hires to identify conversion efficiency. 
-                  A healthy job market shows steady growth in both job postings and new seekers.
+                  <strong>Insight:</strong> Compare applications vs hires to
+                  identify conversion efficiency. A healthy job market shows
+                  steady growth in both job postings and new seekers.
                 </p>
               </div>
             </CardContent>
@@ -708,40 +761,55 @@ export function AdminDashboard() {
               <CardHeader>
                 <CardTitle>Most In-Demand Jobs</CardTitle>
                 <CardDescription>
-                  Top job titles by number of applications received. Shows which positions 
-                  are most sought after by job seekers in Camarines Sur.
+                  Top job titles by number of applications received. Shows which
+                  positions are most sought after by job seekers in Pili,
+                  Camarines Sur.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={inDemandJobs} layout="vertical">
+                  <BarChart
+                    data={inDemandJobs.slice(0, 10)}
+                    layout="vertical"
+                    margin={{ left: 10 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis type="number" />
-                    <YAxis 
-                      dataKey="title" 
-                      type="category" 
-                      width={120}
+                    <YAxis
+                      dataKey="title"
+                      type="category"
+                      width={150}
                       tick={{ fontSize: 11 }}
+                      interval={0}
                     />
-                    <Tooltip 
+                    <Tooltip
                       formatter={(value, name) => {
                         const labels: Record<string, string> = {
-                          totalApplications: 'Total Applications',
-                          totalPostings: 'Job Postings',
-                          companiesHiring: 'Companies Hiring'
+                          totalApplications: "Total Applications",
+                          totalPostings: "Job Postings",
+                          companiesHiring: "Companies Hiring",
                         };
                         return [value, labels[name as string] || name];
                       }}
                     />
                     <Legend />
-                    <Bar dataKey="totalApplications" name="Applications" fill="#8884d8" />
-                    <Bar dataKey="totalPostings" name="Postings" fill="#82ca9d" />
+                    <Bar
+                      dataKey="totalApplications"
+                      name="Applications"
+                      fill="#8884d8"
+                    />
+                    <Bar
+                      dataKey="totalPostings"
+                      name="Postings"
+                      fill="#82ca9d"
+                    />
                   </BarChart>
                 </ResponsiveContainer>
                 <div className="mt-4 p-3 bg-muted/50 rounded-md">
                   <p className="text-sm text-muted-foreground">
-                    <strong>Insight:</strong> High application-to-posting ratio indicates competitive positions. 
-                    Jobs with many postings but few applications may need better visibility.
+                    <strong>Insight:</strong> High application-to-posting ratio
+                    indicates competitive positions. Jobs with many postings but
+                    few applications may need better visibility.
                   </p>
                 </div>
               </CardContent>
@@ -752,40 +820,55 @@ export function AdminDashboard() {
               <CardHeader>
                 <CardTitle>Skills Demand vs Supply Analysis</CardTitle>
                 <CardDescription>
-                  Compares skills demanded by employers vs skills available from job seekers. 
-                  Positive gap means shortage, negative means surplus.
+                  Compares skills demanded by employers vs skills available from
+                  job seekers. Positive gap means shortage, negative means
+                  surplus.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={inDemandSkills.slice(0, 10)} layout="vertical">
+                  <BarChart
+                    data={inDemandSkills.slice(0, 10)}
+                    layout="vertical"
+                    margin={{ left: 10 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis type="number" />
-                    <YAxis 
-                      dataKey="skill" 
-                      type="category" 
-                      width={100}
+                    <YAxis
+                      dataKey="skill"
+                      type="category"
+                      width={120}
                       tick={{ fontSize: 11 }}
+                      interval={0}
                     />
-                    <Tooltip 
-                      formatter={(value, name) => {
-                        const labels: Record<string, string> = {
-                          demandFromEmployers: 'Employer Demand (Job Postings)',
-                          availableFromSeekers: 'Available (Job Seekers)',
-                          gap: 'Skills Gap'
-                        };
-                        return [value, labels[name as string] || name];
-                      }}
+                    <Tooltip
+                      formatter={(value, name) => [
+                        value,
+                        {
+                          demandFromEmployers: "Employer Demand (Job Postings)",
+                          availableFromSeekers: "Available (Job Seekers)",
+                          gap: "Skills Gap",
+                        }[name as string] || name,
+                      ]}
                     />
                     <Legend />
-                    <Bar dataKey="demandFromEmployers" name="Demand" fill="#ff8042" />
-                    <Bar dataKey="availableFromSeekers" name="Supply" fill="#00C49F" />
+                    <Bar
+                      dataKey="demandFromEmployers"
+                      name="Demand"
+                      fill="#ff8042"
+                    />
+                    <Bar
+                      dataKey="availableFromSeekers"
+                      name="Supply"
+                      fill="#00C49F"
+                    />
                   </BarChart>
                 </ResponsiveContainer>
                 <div className="mt-4 p-3 bg-muted/50 rounded-md">
                   <p className="text-sm text-muted-foreground">
-                    <strong>Insight:</strong> Skills with high demand but low supply indicate training opportunities. 
-                    PESO can focus skill development programs on these gap areas.
+                    <strong>Insight:</strong> Skills with high demand but low
+                    supply indicate training opportunities. PESO can focus skill
+                    development programs on these gap areas.
                   </p>
                 </div>
               </CardContent>
@@ -797,38 +880,46 @@ export function AdminDashboard() {
             <CardHeader>
               <CardTitle>Salary Trends by Category (Last 3 Months)</CardTitle>
               <CardDescription>
-                Average salary ranges across job categories. Helps job seekers understand 
-                market rates and employers benchmark their offerings.
+                Average salary ranges across job categories. Helps job seekers
+                understand market rates and employers benchmark their offerings.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={350}>
                 <BarChart data={salaryTrends?.categoryAverages || []}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="category" 
+                  <XAxis
+                    dataKey="category"
                     tick={{ fontSize: 11 }}
                     angle={-45}
                     textAnchor="end"
                     height={80}
                   />
-                  <YAxis 
+                  <YAxis
                     tickFormatter={(value) => `₱${(value / 1000).toFixed(0)}K`}
                   />
-                  <Tooltip 
-                    formatter={(value: number) => [`₱${value.toLocaleString()}`, '']}
+                  <Tooltip
+                    formatter={(value: number) => [
+                      `₱${value.toLocaleString()}`,
+                      "",
+                    ]}
                     labelFormatter={(label) => `Category: ${label}`}
                   />
                   <Legend />
-                  <Bar dataKey="averageSalary" name="Average Salary" fill="#8884d8" />
+                  <Bar
+                    dataKey="averageSalary"
+                    name="Average Salary"
+                    fill="#8884d8"
+                  />
                   <Bar dataKey="minSalary" name="Min Salary" fill="#82ca9d" />
                   <Bar dataKey="maxSalary" name="Max Salary" fill="#ffc658" />
                 </BarChart>
               </ResponsiveContainer>
               <div className="mt-4 p-3 bg-muted/50 rounded-md">
                 <p className="text-sm text-muted-foreground">
-                  <strong>Insight:</strong> Wide salary ranges may indicate varied experience requirements. 
-                  Categories with higher averages typically require specialized skills.
+                  <strong>Insight:</strong> Wide salary ranges may indicate
+                  varied experience requirements. Categories with higher
+                  averages typically require specialized skills.
                 </p>
               </div>
             </CardContent>
@@ -839,50 +930,70 @@ export function AdminDashboard() {
             <CardHeader>
               <CardTitle>Hiring Success Rate by Category</CardTitle>
               <CardDescription>
-                Percentage of applications that result in successful hiring per job category. 
-                Higher rates indicate better candidate-job matching.
+                Percentage of applications that result in successful hiring per
+                job category. Higher rates indicate better candidate-job
+                matching.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {pesoStats?.categoryHiring && pesoStats.categoryHiring.length > 0 ? (
+              {pesoStats?.categoryHiring &&
+              pesoStats.categoryHiring.length > 0 ? (
                 <>
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={pesoStats.categoryHiring}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="category" 
+                      <XAxis
+                        dataKey="category"
                         tick={{ fontSize: 11 }}
                         angle={-45}
                         textAnchor="end"
                         height={80}
                       />
-                      <YAxis 
-                        tickFormatter={(value) => `${value}%`}
-                      />
-                      <Tooltip 
+                      <YAxis tickFormatter={(value) => `${value}%`} />
+                      <Tooltip
                         formatter={(value, name) => {
-                          if (name === 'rate') return [`${value}%`, 'Success Rate'];
-                          return [value, name === 'applications' ? 'Total Applications' : 'Total Hired'];
+                          if (name === "rate")
+                            return [`${value}%`, "Success Rate"];
+                          return [
+                            value,
+                            name === "applications"
+                              ? "Total Applications"
+                              : "Total Hired",
+                          ];
                         }}
                       />
                       <Legend />
-                      <Bar dataKey="rate" name="Success Rate (%)" fill="#82ca9d" />
-                      <Bar dataKey="applications" name="Applications" fill="#8884d8" />
+                      <Bar
+                        dataKey="rate"
+                        name="Success Rate (%)"
+                        fill="#82ca9d"
+                      />
+                      <Bar
+                        dataKey="applications"
+                        name="Applications"
+                        fill="#8884d8"
+                      />
                       <Bar dataKey="hired" name="Hired" fill="#ffc658" />
                     </BarChart>
                   </ResponsiveContainer>
                   <div className="mt-4 p-3 bg-muted/50 rounded-md">
                     <p className="text-sm text-muted-foreground">
-                      <strong>Insight:</strong> Low success rates may indicate misaligned expectations or 
-                      skill gaps. Consider focused training for underperforming categories.
+                      <strong>Insight:</strong> Low success rates may indicate
+                      misaligned expectations or skill gaps. Consider focused
+                      training for underperforming categories.
                     </p>
                   </div>
                 </>
               ) : (
                 <div className="flex items-center justify-center h-[300px] text-muted-foreground">
                   <div className="text-center">
-                    <p className="text-lg font-semibold mb-2">No hiring data available yet</p>
-                    <p className="text-sm">Applications need to be marked as "hired" to show in this chart</p>
+                    <p className="text-lg font-semibold mb-2">
+                      No hiring data available yet
+                    </p>
+                    <p className="text-sm">
+                      Applications need to be marked as "hired" to show in this
+                      chart
+                    </p>
                   </div>
                 </div>
               )}
