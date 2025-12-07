@@ -17,7 +17,7 @@ export async function seedDatabase() {
     const hashedPassword = await bcrypt.hash("password123", 10);
 
     // Admin user
-    const [adminUser] = await db
+    await db
       .insert(users)
       .values({
         email: "admin@pilijobs.com",
@@ -29,11 +29,14 @@ export async function seedDatabase() {
         address: "Pili Centro",
         isActive: true,
         isVerified: true,
-      })
-      .returning();
+      });
+    
+    const adminUserResult = await db.select().from(users).where(eq(users.email, "admin@pilijobs.com"));
+    const adminUser = adminUserResult[0];
+    if (!adminUser) throw new Error("Failed to create adminUser");
 
     // Employer users
-    const [employer1] = await db
+    await db
       .insert(users)
       .values({
         email: "employer1@company.com",
@@ -46,10 +49,13 @@ export async function seedDatabase() {
         isActive: true,
         isVerified: true,
         verificationStatus: "approved",
-      })
-      .returning();
+      });
+    
+    const employer1Result = await db.select().from(users).where(eq(users.email, "employer1@company.com"));
+    const employer1 = employer1Result[0];
+    if (!employer1) throw new Error("Failed to create employer1");
 
-    const [employer2] = await db
+    await db
       .insert(users)
       .values({
         email: "employer2@business.com",
@@ -62,10 +68,13 @@ export async function seedDatabase() {
         isActive: true,
         isVerified: true,
         verificationStatus: "approved",
-      })
-      .returning();
+      });
+    
+    const employer2Result = await db.select().from(users).where(eq(users.email, "employer2@business.com"));
+    const employer2 = employer2Result[0];
+    if (!employer2) throw new Error("Failed to create employer2");
 
-    const [employer3] = await db
+    await db
       .insert(users)
       .values({
         email: "employer3@restaurant.com",
@@ -78,11 +87,14 @@ export async function seedDatabase() {
         isActive: true,
         isVerified: true,
         verificationStatus: "approved",
-      })
-      .returning();
+      });
+    
+    const employer3Result = await db.select().from(users).where(eq(users.email, "employer3@restaurant.com"));
+    const employer3 = employer3Result[0];
+    if (!employer3) throw new Error("Failed to create employer3");
 
     // Job seekers with COMPLETE profiles for testing matching
-    const [jobseeker1] = await db
+    await db
       .insert(users)
       .values({
         email: "maria.tech@email.com",
@@ -98,10 +110,13 @@ export async function seedDatabase() {
         preferredLocation: "Any Location",
         isActive: true,
         isVerified: true,
-      })
-      .returning();
+      });
+    
+    const jobseeker1Result = await db.select().from(users).where(eq(users.email, "maria.tech@email.com"));
+    const jobseeker1 = jobseeker1Result[0];
+    if (!jobseeker1) throw new Error("Failed to create jobseeker1");
 
-    const [jobseeker2] = await db
+    await db
       .insert(users)
       .values({
         email: "pedro.hospitality@email.com",
@@ -117,10 +132,13 @@ export async function seedDatabase() {
         preferredLocation: "Santiago",
         isActive: true,
         isVerified: true,
-      })
-      .returning();
+      });
+    
+    const jobseeker2Result = await db.select().from(users).where(eq(users.email, "pedro.hospitality@email.com"));
+    const jobseeker2 = jobseeker2Result[0];
+    if (!jobseeker2) throw new Error("Failed to create jobseeker2");
 
-    const [jobseeker3] = await db
+    await db
       .insert(users)
       .values({
         email: "anna.admin@email.com",
@@ -136,10 +154,13 @@ export async function seedDatabase() {
         preferredLocation: "Bagumbayan",
         isActive: true,
         isVerified: true,
-      })
-      .returning();
+      });
+    
+    const jobseeker3Result = await db.select().from(users).where(eq(users.email, "anna.admin@email.com"));
+    const jobseeker3 = jobseeker3Result[0];
+    if (!jobseeker3) throw new Error("Failed to create jobseeker3");
 
-    const [jobseeker4] = await db
+    await db
       .insert(users)
       .values({
         email: "jose.driver@email.com",
@@ -155,10 +176,13 @@ export async function seedDatabase() {
         preferredLocation: "Any Location",
         isActive: true,
         isVerified: true,
-      })
-      .returning();
+      });
+    
+    const jobseeker4Result = await db.select().from(users).where(eq(users.email, "jose.driver@email.com"));
+    const jobseeker4 = jobseeker4Result[0];
+    if (!jobseeker4) throw new Error("Failed to create jobseeker4");
 
-    const [jobseeker5] = await db
+    await db
       .insert(users)
       .values({
         email: "lisa.teacher@email.com",
@@ -174,10 +198,13 @@ export async function seedDatabase() {
         preferredLocation: "Santo Domingo",
         isActive: true,
         isVerified: true,
-      })
-      .returning();
+      });
+    
+    const jobseeker5Result = await db.select().from(users).where(eq(users.email, "lisa.teacher@email.com"));
+    const jobseeker5 = jobseeker5Result[0];
+    if (!jobseeker5) throw new Error("Failed to create jobseeker5");
 
-    const [jobseeker6] = await db
+    await db
       .insert(users)
       .values({
         email: "marco.sales@email.com",
@@ -193,8 +220,11 @@ export async function seedDatabase() {
         preferredLocation: "San Jose",
         isActive: true,
         isVerified: true,
-      })
-      .returning();
+      });
+    
+    const jobseeker6Result = await db.select().from(users).where(eq(users.email, "marco.sales@email.com"));
+    const jobseeker6 = jobseeker6Result[0];
+    if (!jobseeker6) throw new Error("Failed to create jobseeker6");
 
     // Create diverse jobs across categories
     const jobsData = [
