@@ -164,9 +164,10 @@ export function JobSeekerApplications() {
                 {application.coverLetter && !application.coverLetter.startsWith("data:") && (
                   <div className="mt-3 pt-3 border-t">
                     <p className="text-sm font-medium text-gray-700 mb-1">Cover Letter:</p>
-                    <p className="text-sm text-gray-600 line-clamp-3">
-                      {application.coverLetter}
-                    </p>
+                    <div className="text-sm text-gray-600 max-h-20 overflow-y-auto p-2 bg-gray-50 rounded border break-words whitespace-pre-wrap">
+                      {application.coverLetter.substring(0, 300)}
+                      {application.coverLetter.length > 300 && "..."}
+                    </div>
                   </div>
                 )}
               </CardContent>

@@ -1108,8 +1108,11 @@ export function EmployerDashboard() {
                               Download Cover Letter
                             </Button>
                           ) : (
-                            <div className="text-sm text-muted-foreground mt-1 max-h-24 overflow-y-auto">
-                              {app.coverLetter || "No cover letter provided"}
+                            <div className="text-sm text-muted-foreground mt-1 max-h-24 overflow-y-auto p-2 bg-gray-50 rounded border break-words whitespace-pre-wrap">
+                              {app.coverLetter?.substring(0, 500) || "No cover letter provided"}
+                              {app.coverLetter && app.coverLetter.length > 500 && (
+                                <span className="text-primary">... (view full text below)</span>
+                              )}
                             </div>
                           )}
                         </div>
