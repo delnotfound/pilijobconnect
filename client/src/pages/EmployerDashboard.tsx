@@ -1087,7 +1087,13 @@ export function EmployerDashboard() {
                             </div>
                             <div className="flex items-center gap-1 text-blue-700 dark:text-blue-300">
                               <Clock className="h-3 w-3" />
-                              {app.interviewTime}
+                              {app.interviewTime ? (() => {
+                                const [hours, minutes] = app.interviewTime.split(':');
+                                const hour = parseInt(hours, 10);
+                                const ampm = hour >= 12 ? 'PM' : 'AM';
+                                const displayHour = hour % 12 || 12;
+                                return `${displayHour}:${minutes} ${ampm}`;
+                              })() : ''}
                             </div>
                             <div className="flex items-center gap-1 text-blue-700 dark:text-blue-300">
                               {app.interviewType === "phone" && <Phone className="h-3 w-3" />}
@@ -1137,9 +1143,9 @@ export function EmployerDashboard() {
                               Download Cover Letter
                             </Button>
                           ) : (
-                            <p className="text-sm text-muted-foreground mt-1">
+                            <div className="text-sm text-muted-foreground mt-1 max-h-24 overflow-y-auto">
                               {app.coverLetter}
-                            </p>
+                            </div>
                           )}
                         </div>
                       )}

@@ -336,6 +336,16 @@ export default function JobListings({ searchQuery, locationFilter }: JobListings
                         <SelectItem value="Construction">Construction</SelectItem>
                         <SelectItem value="Agriculture">Agriculture</SelectItem>
                         <SelectItem value="Government">Government</SelectItem>
+                        <SelectItem value="Technology">Technology</SelectItem>
+                        <SelectItem value="Manufacturing">Manufacturing</SelectItem>
+                        <SelectItem value="Tourism">Tourism</SelectItem>
+                        <SelectItem value="Banking & Finance">Banking & Finance</SelectItem>
+                        <SelectItem value="Real Estate">Real Estate</SelectItem>
+                        <SelectItem value="Security">Security</SelectItem>
+                        <SelectItem value="Customer Service">Customer Service</SelectItem>
+                        <SelectItem value="Sales & Marketing">Sales & Marketing</SelectItem>
+                        <SelectItem value="Administrative">Administrative</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

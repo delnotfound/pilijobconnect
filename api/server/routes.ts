@@ -597,11 +597,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const stats = await storage.getJobStats();
 
+      // Get actual hired this month count from PESO stats
+      const pesoStats = await storage.getPesoStats();
+      const currentMonth = new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+      });
+      const currentMonthStats = pesoStats.monthlyStats.find(
+        (m) => m.month === currentMonth
+      );
+      const hiredThisMonth = currentMonthStats?.hired || 0;
+
       // Convert to expected format with real data
       const formattedStats = {
         activeJobs: stats.activeJobs,
         employers: stats.totalEmployers,
-        hiredThisMonth: stats.applicationsToday, // Use real daily applications as proxy
+        hiredThisMonth: hiredThisMonth, // Use actual hired count from PESO stats
         jobSeekers: stats.totalJobSeekers, // Use real job seeker count
         totalJobs: stats.totalJobs,
         totalApplications: stats.totalApplications,
