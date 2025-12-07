@@ -2446,6 +2446,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         string,
         { applications: number; hired: number; rate: number }
       > = {};
+
+      // Initialize all job categories with zero values
+      const allCategories = await storage.getAllCategories();
+      allCategories.forEach((cat) => {
+        categoryHiring[cat.name] = { applications: 0, hired: 0, rate: 0 };
+      });
+
+      // Count applications and hires per category
       allApplications.forEach((app) => {
         const category = app.job.category;
         if (!categoryHiring[category]) {
@@ -2457,14 +2465,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-      // Calculate rates
-      Object.keys(categoryHiring).forEach((cat) => {
-        const data = categoryHiring[cat];
-        data.rate =
-          data.applications > 0
+      // Calculate rates and filter out categories with no applications
+      const categoryHiringData = Object.entries(categoryHiring)
+        .map(([category, data]) => {
+          const rate = data.applications > 0
             ? parseFloat(((data.hired / data.applications) * 100).toFixed(1))
             : 0;
-      });
+          return { category, applications: data.applications, hired: data.hired, rate };
+        })
+        .filter(data => data.applications > 0) // Only show categories with applications
+        .sort((a, b) => b.rate - a.rate);
 
       res.json({
         placementRate: parseFloat(placementRate),
@@ -2481,9 +2491,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               ? parseFloat(((data.hired / data.applications) * 100).toFixed(1))
               : 0,
         })),
-        categoryHiring: Object.entries(categoryHiring)
-          .map(([category, data]) => ({ category, ...data }))
-          .sort((a, b) => b.rate - a.rate),
+        categoryHiring: categoryHiringData,
       });
     } catch (error) {
       console.error("Error fetching PESO stats:", error);

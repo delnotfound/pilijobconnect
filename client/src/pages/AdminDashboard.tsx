@@ -844,35 +844,48 @@ export function AdminDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={pesoStats?.categoryHiring || []}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="category" 
-                    tick={{ fontSize: 11 }}
-                    angle={-45}
-                    textAnchor="end"
-                    height={80}
-                  />
-                  <YAxis 
-                    tickFormatter={(value) => `${value}%`}
-                  />
-                  <Tooltip 
-                    formatter={(value, name) => {
-                      if (name === 'rate') return [`${value}%`, 'Success Rate'];
-                      return [value, name === 'applications' ? 'Total Applications' : 'Total Hired'];
-                    }}
-                  />
-                  <Legend />
-                  <Bar dataKey="rate" name="Success Rate (%)" fill="#82ca9d" />
-                </BarChart>
-              </ResponsiveContainer>
-              <div className="mt-4 p-3 bg-muted/50 rounded-md">
-                <p className="text-sm text-muted-foreground">
-                  <strong>Insight:</strong> Low success rates may indicate misaligned expectations or 
-                  skill gaps. Consider focused training for underperforming categories.
-                </p>
-              </div>
+              {pesoStats?.categoryHiring && pesoStats.categoryHiring.length > 0 ? (
+                <>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={pesoStats.categoryHiring}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis 
+                        dataKey="category" 
+                        tick={{ fontSize: 11 }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={80}
+                      />
+                      <YAxis 
+                        tickFormatter={(value) => `${value}%`}
+                      />
+                      <Tooltip 
+                        formatter={(value, name) => {
+                          if (name === 'rate') return [`${value}%`, 'Success Rate'];
+                          return [value, name === 'applications' ? 'Total Applications' : 'Total Hired'];
+                        }}
+                      />
+                      <Legend />
+                      <Bar dataKey="rate" name="Success Rate (%)" fill="#82ca9d" />
+                      <Bar dataKey="applications" name="Applications" fill="#8884d8" />
+                      <Bar dataKey="hired" name="Hired" fill="#ffc658" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                  <div className="mt-4 p-3 bg-muted/50 rounded-md">
+                    <p className="text-sm text-muted-foreground">
+                      <strong>Insight:</strong> Low success rates may indicate misaligned expectations or 
+                      skill gaps. Consider focused training for underperforming categories.
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+                  <div className="text-center">
+                    <p className="text-lg font-semibold mb-2">No hiring data available yet</p>
+                    <p className="text-sm">Applications need to be marked as "hired" to show in this chart</p>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
