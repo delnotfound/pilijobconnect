@@ -1087,13 +1087,16 @@ export function EmployerDashboard() {
                             </div>
                             <div className="flex items-center gap-1 text-blue-700 dark:text-blue-300">
                               <Clock className="h-3 w-3" />
-                              {app.interviewTime ? (() => {
-                                const [hours, minutes] = app.interviewTime.split(':');
-                                const hour = parseInt(hours, 10);
+                              {app.interviewTime && app.interviewTime.includes(':') ? (() => {
+                                const parts = app.interviewTime.split(':');
+                                if (parts.length < 2) return app.interviewTime;
+                                const hour = parseInt(parts[0], 10);
+                                const minutes = parts[1];
+                                if (isNaN(hour)) return app.interviewTime;
                                 const ampm = hour >= 12 ? 'PM' : 'AM';
                                 const displayHour = hour % 12 || 12;
                                 return `${displayHour}:${minutes} ${ampm}`;
-                              })() : ''}
+                              })() : (app.interviewTime || 'TBD')}
                             </div>
                             <div className="flex items-center gap-1 text-blue-700 dark:text-blue-300">
                               {app.interviewType === "phone" && <Phone className="h-3 w-3" />}
@@ -1144,7 +1147,7 @@ export function EmployerDashboard() {
                             </Button>
                           ) : (
                             <div className="text-sm text-muted-foreground mt-1 max-h-24 overflow-y-auto">
-                              {app.coverLetter}
+                              {app.coverLetter || "No cover letter provided"}
                             </div>
                           )}
                         </div>
