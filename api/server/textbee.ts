@@ -12,15 +12,21 @@ export async function sendApplicationConfirmationSMS(
   jobTitle: string,
   company: string
 ): Promise<boolean> {
+  console.log(`[SMS] Attempting to send confirmation to ${phone}`);
+  
   if (!TEXTBEE_API_KEY || !TEXTBEE_DEVICE_ID) {
     console.warn(
-      "TEXTBEE_API_KEY or TEXTBEE_DEVICE_ID not configured, skipping SMS"
+      "[SMS] TEXTBEE_API_KEY or TEXTBEE_DEVICE_ID not configured, skipping SMS"
     );
+    console.warn(`[SMS] Config: API Key=${!!TEXTBEE_API_KEY}, Device ID=${!!TEXTBEE_DEVICE_ID}`);
     return false;
   }
 
   try {
     const message = `Hi ${applicantName}! Your application for ${jobTitle} at ${company} has been received. We'll be in touch soon!`;
+
+    console.log(`[SMS] Sending to: ${phone}`);
+    console.log(`[SMS] Device ID: ${TEXTBEE_DEVICE_ID}`);
 
     const response = await fetch(
       `${TEXTBEE_API_URL}/api/v1/gateway/devices/${TEXTBEE_DEVICE_ID}/send-sms`,
@@ -40,14 +46,15 @@ export async function sendApplicationConfirmationSMS(
     const result = await response.json();
 
     if (!response.ok) {
-      console.error("Failed to send SMS:", result);
+      console.error("[SMS] Failed. Status:", response.status);
+      console.error("[SMS] Error:", result);
       return false;
     }
 
-    console.log("SMS sent successfully:", result);
+    console.log("[SMS] Success:", result);
     return true;
   } catch (error) {
-    console.error("Error sending SMS:", error);
+    console.error("[SMS] Exception:", error);
     return false;
   }
 }

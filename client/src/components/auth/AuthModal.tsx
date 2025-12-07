@@ -354,11 +354,16 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                         id="phone"
                         type="tel"
                         value={registerData.phone}
-                        onChange={(e) => setRegisterData(prev => ({ ...prev, phone: e.target.value.replace(/\s+/g, '') }))}
+                        onChange={(e) => {
+                          const cleaned = e.target.value.replace(/\D/g, '');
+                          setRegisterData(prev => ({ ...prev, phone: cleaned }));
+                        }}
                         placeholder="9171234567"
                         className="rounded-l-none"
+                        maxLength={10}
                       />
                     </div>
+                    <p className="text-xs text-gray-500">Enter 10 digits (e.g., 9171234567)</p>
                     {errors.phone && (
                       <p className="text-sm text-red-500">{errors.phone}</p>
                     )}
