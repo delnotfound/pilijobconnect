@@ -1053,11 +1053,11 @@ export function EmployerDashboard() {
                                 const parts = app.interviewTime.split(':');
                                 if (parts.length < 2) return app.interviewTime;
                                 const hour = parseInt(parts[0], 10);
-                                const minutes = parts[1];
+                                const minutes = parts[1].padStart(2, '0');
                                 if (isNaN(hour)) return app.interviewTime;
                                 const ampm = hour >= 12 ? 'PM' : 'AM';
                                 const displayHour = hour % 12 || 12;
-                                return `${displayHour}:${minutes} ${ampm}`;
+                                return `${displayHour.toString().padStart(2, '0')}:${minutes} ${ampm}`;
                               })() : (app.interviewTime || 'TBD')}
                             </div>
                             <div className="flex items-center gap-1 text-blue-700 dark:text-blue-300">
