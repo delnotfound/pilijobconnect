@@ -1408,15 +1408,15 @@ export class DatabaseStorage implements IStorage {
 
       // Count activities for "today" (the most recent activity day)
       applicationsToday = recentApplications.filter(
-        (a) => a.appliedAt >= startOfDay && a.appliedAt < endOfDay
+        (a: any) => a.appliedAt >= startOfDay && a.appliedAt < endOfDay
       ).length;
 
       jobsPostedToday = recentJobs.filter(
-        (j) => j.postedAt >= startOfDay && j.postedAt < endOfDay
+        (j: any) => j.postedAt >= startOfDay && j.postedAt < endOfDay
       ).length;
 
       usersRegisteredToday = recentUsers.filter(
-        (u) => u.createdAt >= startOfDay && u.createdAt < endOfDay
+        (u: any) => u.createdAt >= startOfDay && u.createdAt < endOfDay
       ).length;
 
       console.log("Today's counts:", {
@@ -1464,7 +1464,7 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(applications, eq(jobs.id, applications.jobId))
       .groupBy(jobs.category);
 
-    return categoryStats.map((stat) => ({
+    return categoryStats.map((stat: any) => ({
       category: stat.category,
       jobCount: stat.jobCount,
       applicationCount: stat.applicationCount || 0,
@@ -1482,9 +1482,9 @@ export class DatabaseStorage implements IStorage {
       .where(eq(jobs.isActive, true))
       .groupBy(jobs.type);
 
-    const totalCount = typeStats.reduce((sum, stat) => sum + stat.count, 0);
+    const totalCount = typeStats.reduce((sum: any, stat: any) => sum + stat.count, 0);
 
-    return typeStats.map((stat) => ({
+    return typeStats.map((stat: any) => ({
       type: stat.type,
       count: stat.count,
       percentage: Math.round((stat.count / totalCount) * 100),
@@ -1526,9 +1526,9 @@ export class DatabaseStorage implements IStorage {
 
     // Get the most recent date from all activities
     const allDates = [
-      ...recentJobs.map((j) => j.postedAt),
-      ...recentApplications.map((a) => a.appliedAt),
-      ...recentUsers.map((u) => u.createdAt),
+      ...recentJobs.map((j: any) => j.postedAt),
+      ...recentApplications.map((a: any) => a.appliedAt),
+      ...recentUsers.map((u: any) => u.createdAt),
     ].filter(Boolean);
 
     if (allDates.length === 0) {
@@ -1555,15 +1555,15 @@ export class DatabaseStorage implements IStorage {
 
       // Count activities for this day
       const jobsCount = recentJobs.filter(
-        (j) => j.postedAt >= startOfDay && j.postedAt < endOfDay
+        (j: any) => j.postedAt >= startOfDay && j.postedAt < endOfDay
       ).length;
 
       const applicationsCount = recentApplications.filter(
-        (a) => a.appliedAt >= startOfDay && a.appliedAt < endOfDay
+        (a: any) => a.appliedAt >= startOfDay && a.appliedAt < endOfDay
       ).length;
 
       const usersCount = recentUsers.filter(
-        (u) => u.createdAt >= startOfDay && u.createdAt < endOfDay
+        (u: any) => u.createdAt >= startOfDay && u.createdAt < endOfDay
       ).length;
 
       const dayData = {
@@ -1624,7 +1624,7 @@ export class DatabaseStorage implements IStorage {
     // Combine all activities
     const activities: any[] = [];
 
-    recentApps.forEach((app) => {
+    recentApps.forEach((app: any) => {
       activities.push({
         id: `app-${app.id}`,
         type: "application",
@@ -1633,7 +1633,7 @@ export class DatabaseStorage implements IStorage {
       });
     });
 
-    recentJobs.forEach((job) => {
+    recentJobs.forEach((job: any) => {
       activities.push({
         id: `job-${job.id}`,
         type: "job_posted",

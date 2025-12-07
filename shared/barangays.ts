@@ -29,6 +29,9 @@ export const PILI_BARANGAYS = [
   "Tinangis"
 ] as const;
 
+// Location options for dropdown (includes "All Areas")
+export const LOCATION_OPTIONS = ["Pili (All Areas)", ...PILI_BARANGAYS] as const;
+
 // Standardized Job Categories (used across all components)
 export const JOB_CATEGORIES = [
   "Education",
