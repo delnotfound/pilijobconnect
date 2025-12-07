@@ -10,14 +10,29 @@ import { Users, Clock, TrendingUp, Shield, AlertTriangle, Plus, Briefcase, MapPi
 import { useAuth } from "@/hooks/useAuth";
 import AuthModal from "@/components/auth/AuthModal";
 import { PILI_BARANGAYS } from "@shared/barangays";
+import { useQuery } from "@tanstack/react-query";
 
 interface EmployerPreviewSectionProps {
   onLoginRequired: () => void;
 }
 
+interface Stats {
+  activeJobs: number;
+  employers: number;
+  hiredThisMonth: number;
+  jobSeekers: number;
+  totalJobs: number;
+  totalApplications: number;
+}
+
 export default function EmployerPreviewSection({ onLoginRequired }: EmployerPreviewSectionProps) {
   const { isAuthenticated } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  
+  // Fetch real-time stats
+  const { data: stats } = useQuery<Stats>({
+    queryKey: ["/api/stats"],
+  });
   
   const [previewJob, setPreviewJob] = useState({
     title: "Sales Associate",
@@ -52,20 +67,20 @@ export default function EmployerPreviewSection({ onLoginRequired }: EmployerPrev
             {/* Stats for Employers */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
               <div className="text-center">
-                <div className="text-3xl font-bold text-white">50+</div>
+                <div className="text-3xl font-bold text-white">{stats?.jobSeekers || 0}</div>
                 <p className="text-green-200">Job Seekers</p>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-white">25+</div>
-                <p className="text-green-200">Applications Daily</p>
+                <div className="text-3xl font-bold text-white">{stats?.totalApplications || 0}</div>
+                <p className="text-green-200">Total Applications</p>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-white">90%</div>
-                <p className="text-green-200">Response Rate</p>
+                <div className="text-3xl font-bold text-white">{stats?.activeJobs || 0}</div>
+                <p className="text-green-200">Active Jobs</p>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-white">24hrs</div>
-                <p className="text-green-200">Average Response</p>
+                <div className="text-3xl font-bold text-white">{stats?.hiredThisMonth || 0}</div>
+                <p className="text-green-200">Hired This Month</p>
               </div>
             </div>
           </div>
