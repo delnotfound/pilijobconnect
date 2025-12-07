@@ -8,35 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { PILI_BARANGAYS } from "@shared/barangays";
-
-const JOB_CATEGORIES = [
-  "Education",
-  "Healthcare",
-  "Retail",
-  "Food Service",
-  "Transportation",
-  "Construction",
-  "Agriculture",
-  "Government",
-  "Technology",
-  "Manufacturing",
-  "Tourism",
-  "Banking & Finance",
-  "Real Estate",
-  "Security",
-  "Customer Service",
-  "Sales & Marketing",
-  "Administrative",
-  "Engineering",
-  "Legal",
-  "Beauty & Wellness",
-  "Entertainment",
-  "Non-Profit",
-  "Consulting",
-  "Media & Communications",
-  "Other"
-];
+import { PILI_BARANGAYS, JOB_CATEGORIES } from "@shared/barangays";
 
 export default function PostJobSection() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);

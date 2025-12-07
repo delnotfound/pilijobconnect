@@ -65,7 +65,7 @@ import {
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { PILI_BARANGAYS } from "@shared/barangays";
+import { PILI_BARANGAYS, JOB_CATEGORIES } from "@shared/barangays";
 import EmployerScouting from "@/components/EmployerScouting";
 
 export function EmployerDashboard() {
@@ -80,7 +80,7 @@ export function EmployerDashboard() {
     barangayPermit: null as File | null,
     businessPermit: null as File | null,
   });
-  
+
   // Interview scheduling modal state
   const [showInterviewModal, setShowInterviewModal] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
@@ -91,11 +91,11 @@ export function EmployerDashboard() {
     type: "" as "phone" | "video" | "in-person" | "",
     notes: "",
   });
-  
+
   // Not proceeding modal state
   const [showNotProceedingModal, setShowNotProceedingModal] = useState(false);
   const [notProceedingReason, setNotProceedingReason] = useState("");
-  
+
   const [newJob, setNewJob] = useState({
     title: "",
     company: "",
@@ -469,7 +469,7 @@ export function EmployerDashboard() {
         return "secondary";
     }
   };
-  
+
   const getStatusLabel = (status: string) => {
     switch (status) {
       case "pending":
@@ -491,20 +491,20 @@ export function EmployerDashboard() {
         return status;
     }
   };
-  
+
   const handleScheduleInterview = (app: any) => {
     setSelectedApplication(app);
     setShowInterviewModal(true);
   };
-  
+
   const handleNotProceeding = (app: any) => {
     setSelectedApplication(app);
     setShowNotProceedingModal(true);
   };
-  
+
   const submitInterviewSchedule = () => {
     if (!selectedApplication) return;
-    
+
     if (!interviewData.date || !interviewData.time || !interviewData.venue || !interviewData.type) {
       toast({
         title: "Error",
@@ -513,7 +513,7 @@ export function EmployerDashboard() {
       });
       return;
     }
-    
+
     updateApplicationMutation.mutate({
       id: selectedApplication.id,
       status: "interview_scheduled",
@@ -524,10 +524,10 @@ export function EmployerDashboard() {
       interviewNotes: interviewData.notes,
     });
   };
-  
+
   const submitNotProceeding = () => {
     if (!selectedApplication) return;
-    
+
     if (!notProceedingReason.trim()) {
       toast({
         title: "Error",
@@ -536,7 +536,7 @@ export function EmployerDashboard() {
       });
       return;
     }
-    
+
     updateApplicationMutation.mutate({
       id: selectedApplication.id,
       status: "not_proceeding",
@@ -699,49 +699,11 @@ export function EmployerDashboard() {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Education">Education</SelectItem>
-                      <SelectItem value="Healthcare">Healthcare</SelectItem>
-                      <SelectItem value="Retail">Retail</SelectItem>
-                      <SelectItem value="Food Service">Food Service</SelectItem>
-                      <SelectItem value="Transportation">
-                        Transportation
-                      </SelectItem>
-                      <SelectItem value="Construction">Construction</SelectItem>
-                      <SelectItem value="Agriculture">Agriculture</SelectItem>
-                      <SelectItem value="Government">Government</SelectItem>
-                      <SelectItem value="Technology">Technology</SelectItem>
-                      <SelectItem value="Manufacturing">
-                        Manufacturing
-                      </SelectItem>
-                      <SelectItem value="Tourism">Tourism</SelectItem>
-                      <SelectItem value="Banking & Finance">
-                        Banking & Finance
-                      </SelectItem>
-                      <SelectItem value="Real Estate">Real Estate</SelectItem>
-                      <SelectItem value="Security">Security</SelectItem>
-                      <SelectItem value="Customer Service">
-                        Customer Service
-                      </SelectItem>
-                      <SelectItem value="Sales & Marketing">
-                        Sales & Marketing
-                      </SelectItem>
-                      <SelectItem value="Administrative">
-                        Administrative
-                      </SelectItem>
-                      <SelectItem value="Engineering">Engineering</SelectItem>
-                      <SelectItem value="Legal">Legal</SelectItem>
-                      <SelectItem value="Beauty & Wellness">
-                        Beauty & Wellness
-                      </SelectItem>
-                      <SelectItem value="Entertainment">
-                        Entertainment
-                      </SelectItem>
-                      <SelectItem value="Non-Profit">Non-Profit</SelectItem>
-                      <SelectItem value="Consulting">Consulting</SelectItem>
-                      <SelectItem value="Media & Communications">
-                        Media & Communications
-                      </SelectItem>
-                      <SelectItem value="Other">Other</SelectItem>
+                      {JOB_CATEGORIES.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -1073,7 +1035,7 @@ export function EmployerDashboard() {
                           {new Date(app.appliedAt).toLocaleDateString()}
                         </span>
                       </div>
-                      
+
                       {/* Show interview details if scheduled */}
                       {app.status === "interview_scheduled" && app.interviewDate && (
                         <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950 rounded-md">
@@ -1116,7 +1078,7 @@ export function EmployerDashboard() {
                           )}
                         </div>
                       )}
-                      
+
                       {/* Show not proceeding reason if applicable */}
                       {app.status === "not_proceeding" && app.notProceedingReason && (
                         <div className="mt-3 p-3 bg-red-50 dark:bg-red-950 rounded-md">
@@ -1125,7 +1087,7 @@ export function EmployerDashboard() {
                           </p>
                         </div>
                       )}
-                      
+
                       {app.coverLetter && (
                         <div className="mt-3">
                           <p className="text-sm font-medium">Cover Letter:</p>
@@ -1172,7 +1134,7 @@ export function EmployerDashboard() {
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Action Buttons - Following the workflow */}
                     <div className="flex flex-col space-y-2 ml-4 min-w-[140px]">
                       {/* Step 1: Mark as Reviewed (from Applied) */}
@@ -1192,7 +1154,7 @@ export function EmployerDashboard() {
                           Mark Reviewed
                         </Button>
                       )}
-                      
+
                       {/* Step 2: Schedule Interview (from Reviewed) */}
                       {app.status === "reviewed" && (
                         <Button
@@ -1205,7 +1167,7 @@ export function EmployerDashboard() {
                           Schedule Interview
                         </Button>
                       )}
-                      
+
                       {/* Step 3: Mark Interview Completed (from Interview Scheduled) */}
                       {app.status === "interview_scheduled" && (
                         <Button
@@ -1223,7 +1185,7 @@ export function EmployerDashboard() {
                           Interview Done
                         </Button>
                       )}
-                      
+
                       {/* Step 4: Final Decision (from Interview Completed) */}
                       {app.status === "interview_completed" && (
                         <>
@@ -1253,7 +1215,7 @@ export function EmployerDashboard() {
                           </Button>
                         </>
                       )}
-                      
+
                       {/* Not Proceeding option for any non-final status */}
                       {(app.status === "reviewed" || app.status === "interview_scheduled") && (
                         <Button
@@ -1267,7 +1229,7 @@ export function EmployerDashboard() {
                           Not Proceeding
                         </Button>
                       )}
-                      
+
                       {/* Show status for completed applications */}
                       {(app.status === "hired" || app.status === "not_proceeding") && (
                         <div className="text-sm text-muted-foreground text-center">
@@ -1325,7 +1287,7 @@ export function EmployerDashboard() {
                 <p className="font-medium">{selectedApplication.firstName} {selectedApplication.lastName}</p>
                 <p className="text-sm text-muted-foreground">Applying for: {selectedApplication.jobTitle}</p>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="interview-date">Interview Date *</Label>
@@ -1349,7 +1311,7 @@ export function EmployerDashboard() {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="interview-type">Interview Type *</Label>
                 <Select
@@ -1381,7 +1343,7 @@ export function EmployerDashboard() {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="interview-venue">Venue / Meeting Link *</Label>
                 <Input
@@ -1392,7 +1354,7 @@ export function EmployerDashboard() {
                   data-testid="input-interview-venue"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="interview-notes">Additional Notes (Optional)</Label>
                 <Textarea
@@ -1404,7 +1366,7 @@ export function EmployerDashboard() {
                   data-testid="input-interview-notes"
                 />
               </div>
-              
+
               <div className="flex justify-end space-x-2 pt-4">
                 <Button 
                   variant="outline" 
@@ -1442,7 +1404,7 @@ export function EmployerDashboard() {
                 <p className="font-medium">{selectedApplication.firstName} {selectedApplication.lastName}</p>
                 <p className="text-sm text-muted-foreground">Applied for: {selectedApplication.jobTitle}</p>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="not-proceeding-reason">Reason for Not Proceeding *</Label>
                 <Textarea
@@ -1457,7 +1419,7 @@ export function EmployerDashboard() {
                   This reason will be sent to the applicant via SMS to provide feedback.
                 </p>
               </div>
-              
+
               <div className="flex justify-end space-x-2 pt-4">
                 <Button 
                   variant="outline" 

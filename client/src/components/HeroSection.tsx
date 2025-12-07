@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Search, MapPin } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { LOCATION_OPTIONS } from "@shared/barangays";
+import { LOCATION_OPTIONS, JOB_CATEGORIES } from "@shared/barangays";
 import PiliBackground from "@assets/Pili.jpeg";
 
 interface HeroSectionProps {
