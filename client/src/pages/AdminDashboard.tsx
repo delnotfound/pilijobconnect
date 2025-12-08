@@ -954,12 +954,11 @@ export function AdminDashboard() {
                         formatter={(value, name) => {
                           if (name === "rate")
                             return [`${value}%`, "Success Rate"];
-                          return [
-                            value,
-                            name === "applications"
-                              ? "Total Applications"
-                              : "Total Hired",
-                          ];
+                          if (name === "applications")
+                            return [value, "Total Applications"];
+                          if (name === "hired")
+                            return [value, "Total Hired"];
+                          return [value, name];
                         }}
                       />
                       <Legend />
@@ -1154,3 +1153,5 @@ export function AdminDashboard() {
     </div>
   );
 }
+
+
