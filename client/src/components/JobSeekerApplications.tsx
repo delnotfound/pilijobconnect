@@ -1,14 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  Briefcase, 
-  MapPin, 
-  Calendar, 
+import {
+  Briefcase,
+  MapPin,
+  Calendar,
   Clock,
   FileText,
-  Download
+  Download,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -37,23 +43,33 @@ export function JobSeekerApplications() {
   const { user } = useAuth();
 
   const { data: applications = [], isLoading } = useQuery<Application[]>({
-    queryKey: ['/api/jobseeker/applications'],
-    enabled: !!user && user.role === 'jobseeker',
+    queryKey: ["/api/jobseeker/applications"],
+    enabled: !!user && user.role === "jobseeker",
   });
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'reviewed': return 'bg-blue-100 text-blue-800';
-      case 'interviewing': return 'bg-purple-100 text-purple-800';
-      case 'hired': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "reviewed":
+        return "bg-blue-100 text-blue-800";
+      case "interviewing":
+        return "bg-purple-100 text-purple-800";
+      case "hired":
+        return "bg-green-100 text-green-800";
+      case "rejected":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
-  const downloadResume = (applicationId: number, firstName: string, lastName: string) => {
-    const link = document.createElement('a');
+  const downloadResume = (
+    applicationId: number,
+    firstName: string,
+    lastName: string
+  ) => {
+    const link = document.createElement("a");
     link.href = `/api/download/resume/${applicationId}`;
     link.download = `${firstName}_${lastName}_resume`;
     document.body.appendChild(link);
@@ -79,7 +95,8 @@ export function JobSeekerApplications() {
           <p className="text-muted-foreground">Track your job applications</p>
         </div>
         <div className="text-sm text-gray-600">
-          {applications.length} application{applications.length !== 1 ? 's' : ''}
+          {applications.length} application
+          {applications.length !== 1 ? "s" : ""}
         </div>
       </div>
 
@@ -87,18 +104,27 @@ export function JobSeekerApplications() {
         <Card>
           <CardContent className="p-8 text-center">
             <Briefcase className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Applications Yet</h3>
-            <p className="text-gray-600">Start applying for jobs to see your applications here.</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              No Applications Yet
+            </h3>
+            <p className="text-gray-600">
+              Start applying for jobs to see your applications here.
+            </p>
           </CardContent>
         </Card>
       ) : (
         <div className="grid gap-4">
           {applications.map((application) => (
-            <Card key={application.id} className="hover:shadow-md transition-shadow">
+            <Card
+              key={application.id}
+              className="hover:shadow-md transition-shadow"
+            >
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-lg">{application.job.title}</CardTitle>
+                    <CardTitle className="text-lg">
+                      {application.job.title}
+                    </CardTitle>
                     <CardDescription className="flex items-center gap-4 mt-1">
                       <span className="flex items-center">
                         <Briefcase className="mr-1 h-4 w-4" />
@@ -115,7 +141,8 @@ export function JobSeekerApplications() {
                     </CardDescription>
                   </div>
                   <Badge className={getStatusColor(application.status)}>
-                    {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                    {application.status.charAt(0).toUpperCase() +
+                      application.status.slice(1)}
                   </Badge>
                 </div>
               </CardHeader>
@@ -124,7 +151,8 @@ export function JobSeekerApplications() {
                   <div>
                     <p className="text-sm text-gray-600 mb-1">
                       <Calendar className="inline mr-1 h-3 w-3" />
-                      Applied: {new Date(application.appliedAt).toLocaleDateString()}
+                      Applied:{" "}
+                      {new Date(application.appliedAt).toLocaleDateString()}
                     </p>
                     <p className="text-sm text-gray-600">
                       Salary: {application.job.salary}
@@ -135,20 +163,29 @@ export function JobSeekerApplications() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => downloadResume(application.id, application.firstName, application.lastName)}
+                        onClick={() =>
+                          downloadResume(
+                            application.id,
+                            application.firstName,
+                            application.lastName
+                          )
+                        }
                       >
                         <Download className="mr-1 h-3 w-3" />
                         Resume
                       </Button>
                     )}
                     {application.coverLetter && (
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => {
                           if (application.coverLetter?.startsWith("data:")) {
                             // It's a file - download it
-                            window.open(`/api/download/cover-letter/${application.id}`, "_blank");
+                            window.open(
+                              `/api/download/cover-letter/${application.id}`,
+                              "_blank"
+                            );
                           } else {
                             // It's text - show in alert (or you could create a modal)
                             alert(application.coverLetter);
@@ -156,19 +193,23 @@ export function JobSeekerApplications() {
                         }}
                       >
                         <FileText className="mr-1 h-3 w-3" />
-                        {application.coverLetter?.startsWith("data:") ? "Download" : "View"} Cover Letter
+                        {application.coverLetter?.startsWith("data:")
+                          ? "Download"
+                          : "View"}{" "}
+                        Cover Letter
                       </Button>
                     )}
                   </div>
                 </div>
-                {application.coverLetter && !application.coverLetter.startsWith("data:") && (
-                  <div className="mt-3">
-                    <p className="text-sm font-medium">Cover Letter:</p>
-                    <div className="text-sm text-muted-foreground mt-1 max-h-24 overflow-y-auto">
-                      {application.coverLetter || "No cover letter provided"}
+                {application.coverLetter &&
+                  !application.coverLetter.startsWith("data:") && (
+                    <div className="mt-3">
+                      <p className="text-sm font-medium">Cover Letter:</p>
+                      <div className="text-sm text-muted-foreground mt-1 max-h-24 overflow-y-auto">
+                        {application.coverLetter || "No cover letter provided"}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </CardContent>
             </Card>
           ))}

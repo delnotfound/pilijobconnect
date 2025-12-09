@@ -1482,7 +1482,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(jobs.isActive, true))
       .groupBy(jobs.type);
 
-    const totalCount = typeStats.reduce((sum: any, stat: any) => sum + stat.count, 0);
+    const totalCount = typeStats.reduce(
+      (sum: any, stat: any) => sum + stat.count,
+      0
+    );
 
     return typeStats.map((stat: any) => ({
       type: stat.type,
@@ -2242,11 +2245,35 @@ export class DatabaseStorage implements IStorage {
     // All jobs in this system are local to Pili since locations are Pili barangays
     // The barangay names (Anayan, Bagong Sirang, San Jose, etc.) are all in Pili, Camarines Sur
     const piliBarangays = [
-      "anayan", "bagong sirang", "binanwaanan", "binobong", "cadlan", "caroyroyan",
-      "curry", "del rosario", "himaao", "la purisima", "new san roque", "old san roque",
-      "palestina", "pawili", "sagrada", "sagurong", "san agustin", "san antonio",
-      "san isidro", "san jose", "san juan", "san vicente", "santiago", "santo niño",
-      "tagbong", "tinangis", "pili", "camarines sur", "cam sur"
+      "anayan",
+      "bagong sirang",
+      "binanwaanan",
+      "binobong",
+      "cadlan",
+      "caroyroyan",
+      "curry",
+      "del rosario",
+      "himaao",
+      "la purisima",
+      "new san roque",
+      "old san roque",
+      "palestina",
+      "pawili",
+      "sagrada",
+      "sagurong",
+      "san agustin",
+      "san antonio",
+      "san isidro",
+      "san jose",
+      "san juan",
+      "san vicente",
+      "santiago",
+      "santo niño",
+      "tagbong",
+      "tinangis",
+      "pili",
+      "camarines sur",
+      "cam sur",
     ];
     const localJobs = allJobs.filter((job) =>
       piliBarangays.some((loc) => job.location.toLowerCase().includes(loc))
@@ -2310,5 +2337,3 @@ export class DatabaseStorage implements IStorage {
 }
 
 export const storage = new DatabaseStorage();
-
-

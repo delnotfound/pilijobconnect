@@ -1,4 +1,3 @@
-
 // Pili, Camarines Sur Barangays
 export const PILI_BARANGAYS = [
   "Anayan",
@@ -26,11 +25,14 @@ export const PILI_BARANGAYS = [
   "Santiago",
   "Santo Niño",
   "Tagbong",
-  "Tinangis"
+  "Tinangis",
 ] as const;
 
 // Location options for dropdown (includes "All Areas")
-export const LOCATION_OPTIONS = ["Pili (All Areas)", ...PILI_BARANGAYS] as const;
+export const LOCATION_OPTIONS = [
+  "Pili (All Areas)",
+  ...PILI_BARANGAYS,
+] as const;
 
 // Standardized Job Categories (used across all components)
 export const JOB_CATEGORIES = [
@@ -58,5 +60,5 @@ export const JOB_CATEGORIES = [
   "Non-Profit",
   "Consulting",
   "Media & Communications",
-  "Other"
+  "Other",
 ] as const;
