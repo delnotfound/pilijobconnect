@@ -818,7 +818,7 @@ export function AdminDashboard() {
             {/* Most In-Demand Skills */}
             <Card>
               <CardHeader>
-                <CardTitle>Mamamo vs Supply Analysis</CardTitle>
+                <CardTitle>Skills Demand vs Supply Analysis</CardTitle>
                 <CardDescription>
                   Compares skills demanded by employers vs skills available from
                   job seekers. Positive gap means shortage, negative means
