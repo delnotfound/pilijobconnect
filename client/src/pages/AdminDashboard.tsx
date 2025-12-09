@@ -454,7 +454,7 @@ export function AdminDashboard() {
         <TabsContent value="analytics" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Category Distribution */}
-            <Card>
+            <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle>Jobs by Category</CardTitle>
                 <CardDescription>
@@ -519,7 +519,7 @@ export function AdminDashboard() {
                 </ResponsiveContainer>
               </CardContent>
             </Card> */}
-            Application Trends
+
             <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle>Activity Trends</CardTitle>
