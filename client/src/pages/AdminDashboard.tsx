@@ -485,7 +485,7 @@ export function AdminDashboard() {
               </CardContent>
             </Card>
             {/* Job Type Distribution */}
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>Job Types</CardTitle>
                 <CardDescription>
@@ -518,7 +518,7 @@ export function AdminDashboard() {
                   </PieChart>
                 </ResponsiveContainer>
               </CardContent>
-            </Card>
+            </Card> */}
             Application Trends
             <Card className="lg:col-span-2">
               <CardHeader>
