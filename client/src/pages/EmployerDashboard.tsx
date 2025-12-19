@@ -513,6 +513,7 @@ export function EmployerDashboard() {
 
     const statusMap: Record<string, string> = {
       reviewed: "reviewed",
+      additional_requirements: "additional_requirements",
       interviewing: "interview_scheduled",
       hired: "hired",
       rejected: "not_proceeding",

@@ -42,6 +42,11 @@ export function ApplicationStatusModal({
       description: "Application has been checked",
     },
     {
+      value: "additional_requirements",
+      label: "Additional Requirements",
+      description: "Request applicant to submit required documents",
+    },
+    {
       value: "interviewing",
       label: "Interview Scheduled",
       description: "Applicant is invited for an interview",
@@ -68,6 +73,13 @@ export function ApplicationStatusModal({
 
     onUpdate(selectedStatus, selectedStatus === "rejected" ? notSelectedReason : undefined);
     onClose();
+  };
+
+  const getStatusDescription = () => {
+    if (selectedStatus === "additional_requirements") {
+      return "The applicant will be notified to submit: Valid ID, Police Clearance, and SSS Proof.";
+    }
+    return null;
   };
 
   return (
@@ -118,6 +130,14 @@ export function ApplicationStatusModal({
                 rows={3}
                 disabled={isPending}
               />
+            </div>
+          )}
+
+          {getStatusDescription() && (
+            <div className="space-y-2 mt-4 p-3 bg-blue-50 dark:bg-blue-950 rounded-md">
+              <p className="text-sm text-blue-900 dark:text-blue-100">
+                {getStatusDescription()}
+              </p>
             </div>
           )}
         </div>

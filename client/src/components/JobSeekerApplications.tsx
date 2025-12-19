@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   Card,
   CardContent,
@@ -15,9 +16,14 @@ import {
   Clock,
   FileText,
   Download,
+  AlertCircle,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { ApplicationProgressStepper } from "@/components/ApplicationProgressStepper";
+import { DocumentUploadModal } from "@/components/DocumentUploadModal";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 
 interface Application {
   id: number;
@@ -31,6 +37,10 @@ interface Application {
   resume?: string;
   status: string;
   appliedAt: string;
+  additionalRequirementsRequested?: boolean;
+  validIdDocument?: string;
+  policeClearanceDocument?: string;
+  sssProofDocument?: string;
   job: {
     title: string;
     company: string;
@@ -42,23 +52,72 @@ interface Application {
 
 export function JobSeekerApplications() {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [selectedApplicationForDocs, setSelectedApplicationForDocs] = useState<Application | null>(null);
 
   const { data: applications = [], isLoading } = useQuery<Application[]>({
     queryKey: ["/api/jobseeker/applications"],
     enabled: !!user && user.role === "jobseeker",
   });
 
+  const uploadDocumentsMutation = useMutation({
+    mutationFn: async (data: {
+      applicationId: number;
+      validId: File;
+      policeClearance: File;
+      sssProof: File;
+    }) => {
+      const formData = new FormData();
+      formData.append("validId", data.validId);
+      formData.append("policeClearance", data.policeClearance);
+      formData.append("sssProof", data.sssProof);
+
+      const response = await fetch(`/api/applications/${data.applicationId}/documents`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload documents");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Documents uploaded successfully! The employer has been notified.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/jobseeker/applications"] });
+      setShowDocumentModal(false);
+      setSelectedApplicationForDocs(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to upload documents",
+        variant: "destructive",
+      });
+    },
+  });
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
+      case "applied":
         return "bg-yellow-100 text-yellow-800";
       case "reviewed":
         return "bg-blue-100 text-blue-800";
+      case "additional_requirements":
+        return "bg-orange-100 text-orange-800";
       case "interviewing":
+      case "interview_scheduled":
         return "bg-purple-100 text-purple-800";
       case "hired":
         return "bg-green-100 text-green-800";
       case "rejected":
+      case "not_proceeding":
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -145,6 +204,32 @@ export function JobSeekerApplications() {
                 <ApplicationProgressStepper status={application.status} />
               </CardHeader>
               <CardContent>
+                {application.status === "additional_requirements" && application.additionalRequirementsRequested && (
+                  <div className="mb-4 p-3 bg-orange-50 dark:bg-orange-950 rounded-md border border-orange-200 dark:border-orange-800">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-orange-900 dark:text-orange-100">
+                          Documents Required
+                        </p>
+                        <p className="text-sm text-orange-800 dark:text-orange-200 mt-1">
+                          The employer is requesting your Valid ID, Police Clearance, and SSS Proof. Please upload these documents to proceed.
+                        </p>
+                        <Button
+                          size="sm"
+                          className="mt-2 bg-orange-600 hover:bg-orange-700"
+                          onClick={() => {
+                            setSelectedApplicationForDocs(application);
+                            setShowDocumentModal(true);
+                          }}
+                          data-testid="button-upload-documents"
+                        >
+                          Upload Documents
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">
@@ -213,6 +298,29 @@ export function JobSeekerApplications() {
           ))}
         </div>
       )}
+
+      <DocumentUploadModal
+        isOpen={showDocumentModal}
+        onClose={() => {
+          setShowDocumentModal(false);
+          setSelectedApplicationForDocs(null);
+        }}
+        onUpload={async (documents) => {
+          if (!selectedApplicationForDocs) return;
+          await uploadDocumentsMutation.mutateAsync({
+            applicationId: selectedApplicationForDocs.id,
+            validId: documents.validId!,
+            policeClearance: documents.policeClearance!,
+            sssProof: documents.sssProof!,
+          });
+        }}
+        isLoading={uploadDocumentsMutation.isPending}
+        uploadedDocuments={{
+          validId: !!selectedApplicationForDocs?.validIdDocument,
+          policeClearance: !!selectedApplicationForDocs?.policeClearanceDocument,
+          sssProof: !!selectedApplicationForDocs?.sssProofDocument,
+        }}
+      />
     </div>
   );
 }

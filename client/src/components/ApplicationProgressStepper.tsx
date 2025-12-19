@@ -10,6 +10,7 @@ const normalizeStatus = (status: string): string => {
     pending: "applied",
     applied: "applied",
     reviewed: "reviewed",
+    additional_requirements: "additional_requirements",
     interviewing: "interviewing",
     "interview_scheduled": "interviewing",
     hired: "hired",
@@ -28,6 +29,7 @@ export function ApplicationProgressStepper({
   const stages = [
     { key: "applied", label: "Applied", icon: CheckCircle2 },
     { key: "reviewed", label: "Reviewed", icon: CheckCircle2 },
+    { key: "additional_requirements", label: "Additional Docs", icon: AlertCircle },
     { key: "interviewing", label: "For Interview", icon: Calendar },
     { key: "hired", label: "Hired", icon: CheckCircle2 },
     { key: "rejected", label: "Not Selected", icon: XCircle },

@@ -1041,6 +1041,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
               job.company,
               notProceedingReason
             );
+          } else if (status === "additional_requirements") {
+            // Send additional requirements SMS
+            await sendApplicationStatusUpdateSMS(
+              currentApplication.phone,
+              applicantName,
+              job.title,
+              job.company,
+              "additional_requirements"
+            );
           } else if (status === "hired" || status === "reviewed") {
             // Send general status update SMS
             await sendApplicationStatusUpdateSMS(
@@ -1061,6 +1070,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating application:", error);
       res.status(500).json({ message: "Failed to update application" });
+    }
+  });
+
+  // Document upload endpoint for additional requirements
+  app.post("/api/applications/:id/documents", async (req, res) => {
+    try {
+      const applicationId = parseInt(req.params.id);
+      
+      // Get the application to find employer and job details
+      const application = await storage.getApplicationById(applicationId);
+      if (!application) {
+        return res.status(404).json({ message: "Application not found" });
+      }
+
+      // Get job details
+      const job = await storage.getJob(application.jobId);
+      if (!job) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+
+      // Get employer details
+      const employer = await storage.getUserById(job.employerId!);
+      if (!employer) {
+        return res.status(404).json({ message: "Employer not found" });
+      }
+
+      // In a real implementation, you would:
+      // 1. Extract files from req.files
+      // 2. Upload to cloud storage (S3, etc.)
+      // 3. Store URLs in database
+
+      // For now, just mark as uploaded and update database
+      const updatedApplication = await storage.updateApplication(applicationId, {
+        validIdDocument: "uploaded",
+        policeClearanceDocument: "uploaded",
+        sssProofDocument: "uploaded",
+        documentsUploadedAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      // Send SMS notification to employer
+      if (employer.phone) {
+        try {
+          await sendApplicationStatusUpdateSMS(
+            employer.phone,
+            application.firstName + " " + application.lastName,
+            job.title,
+            job.company,
+            "documents_uploaded"
+          );
+        } catch (smsError) {
+          console.error("SMS notification error:", smsError);
+        }
+      }
+
+      res.json(updatedApplication);
+    } catch (error) {
+      console.error("Error uploading documents:", error);
+      res.status(500).json({ message: "Failed to upload documents" });
     }
   });
 
