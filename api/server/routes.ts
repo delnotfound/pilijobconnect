@@ -1104,8 +1104,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // For now, just mark as uploaded and update database
       const updatedApplication = await storage.updateApplication(applicationId, {
         validIdDocument: "uploaded",
-        policeClearanceDocument: "uploaded",
-        sssProofDocument: "uploaded",
+        nbiclearanceDocument: "uploaded",
+        personalDataSheetDocument: "uploaded",
         documentsUploadedAt: new Date(),
         updatedAt: new Date(),
       });

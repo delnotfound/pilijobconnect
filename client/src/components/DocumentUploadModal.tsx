@@ -17,14 +17,14 @@ interface DocumentUploadModalProps {
   onClose: () => void;
   onUpload: (documents: {
     validId: File | null;
-    policeClearance: File | null;
-    sssProof: File | null;
+    nbiClearance: File | null;
+    personalDataSheet: File | null;
   }) => Promise<void>;
   isLoading: boolean;
   uploadedDocuments?: {
     validId?: boolean;
-    policeClearance?: boolean;
-    sssProof?: boolean;
+    nbiClearance?: boolean;
+    personalDataSheet?: boolean;
   };
 }
 
@@ -36,8 +36,8 @@ export function DocumentUploadModal({
   uploadedDocuments = {},
 }: DocumentUploadModalProps) {
   const [validId, setValidId] = useState<File | null>(null);
-  const [policeClearance, setPoliceClearance] = useState<File | null>(null);
-  const [sssProof, setSssProof] = useState<File | null>(null);
+  const [nbiClearance, setNbiClearance] = useState<File | null>(null);
+  const [personalDataSheet, setPersonalDataSheet] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = (
@@ -53,27 +53,25 @@ export function DocumentUploadModal({
   };
 
   const handleSubmit = async () => {
-    if (!validId || !policeClearance || !sssProof) {
-      setError("All three documents are required");
+    if (!validId || !nbiClearance) {
+      setError("Valid ID and NBI Clearance are required");
       return;
     }
 
     await onUpload({
       validId,
-      policeClearance,
-      sssProof,
+      nbiClearance,
+      personalDataSheet,
     });
 
     setValidId(null);
-    setPoliceClearance(null);
-    setSssProof(null);
+    setNbiClearance(null);
+    setPersonalDataSheet(null);
     onClose();
   };
 
   const isAllUploaded =
-    uploadedDocuments?.validId &&
-    uploadedDocuments?.policeClearance &&
-    uploadedDocuments?.sssProof;
+    uploadedDocuments?.validId && uploadedDocuments?.nbiClearance;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -81,8 +79,7 @@ export function DocumentUploadModal({
         <DialogHeader>
           <DialogTitle>Submit Required Documents</DialogTitle>
           <DialogDescription>
-            The employer is requesting the following documents to proceed with
-            your application
+            The employer requires Valid ID and NBI Clearance. Personal Data Sheet is optional.
           </DialogDescription>
         </DialogHeader>
 
@@ -129,23 +126,23 @@ export function DocumentUploadModal({
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="police-clearance" className="text-sm font-medium">
-                Police Clearance (Scanned Copy) *
+              <Label htmlFor="nbi-clearance" className="text-sm font-medium">
+                NBI Clearance (Scanned Copy) *
               </Label>
-              {uploadedDocuments?.policeClearance && (
+              {uploadedDocuments?.nbiClearance && (
                 <CheckCircle className="h-4 w-4 text-green-600" />
               )}
             </div>
             <Input
-              id="police-clearance"
+              id="nbi-clearance"
               type="file"
               accept="image/*,application/pdf"
               onChange={(e) => {
                 const file = handleFileChange(e.target.files?.[0] || null);
-                if (file) setPoliceClearance(file);
+                if (file) setNbiClearance(file);
               }}
-              disabled={isLoading || uploadedDocuments?.policeClearance}
-              data-testid="input-police-clearance"
+              disabled={isLoading || uploadedDocuments?.nbiClearance}
+              data-testid="input-nbi-clearance"
             />
             <p className="text-xs text-muted-foreground">
               Accepted formats: PDF, JPG, PNG (Max 5MB)
@@ -154,23 +151,23 @@ export function DocumentUploadModal({
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="sss-proof" className="text-sm font-medium">
-                SSS Proof (Scanned Copy) *
+              <Label htmlFor="personal-data-sheet" className="text-sm font-medium">
+                Personal Data Sheet (Optional)
               </Label>
-              {uploadedDocuments?.sssProof && (
+              {uploadedDocuments?.personalDataSheet && (
                 <CheckCircle className="h-4 w-4 text-green-600" />
               )}
             </div>
             <Input
-              id="sss-proof"
+              id="personal-data-sheet"
               type="file"
               accept="image/*,application/pdf"
               onChange={(e) => {
                 const file = handleFileChange(e.target.files?.[0] || null);
-                if (file) setSssProof(file);
+                if (file) setPersonalDataSheet(file);
               }}
-              disabled={isLoading || uploadedDocuments?.sssProof}
-              data-testid="input-sss-proof"
+              disabled={isLoading || uploadedDocuments?.personalDataSheet}
+              data-testid="input-personal-data-sheet"
             />
             <p className="text-xs text-muted-foreground">
               Accepted formats: PDF, JPG, PNG (Max 5MB)
@@ -190,7 +187,7 @@ export function DocumentUploadModal({
           {!isAllUploaded && (
             <Button
               onClick={handleSubmit}
-              disabled={!validId || !policeClearance || !sssProof || isLoading}
+              disabled={!validId || !nbiClearance || isLoading}
               className="bg-green-600 hover:bg-green-700"
               data-testid="button-submit-documents"
             >

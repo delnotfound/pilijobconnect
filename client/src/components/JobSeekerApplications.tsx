@@ -39,8 +39,8 @@ interface Application {
   appliedAt: string;
   additionalRequirementsRequested?: boolean;
   validIdDocument?: string;
-  policeClearanceDocument?: string;
-  sssProofDocument?: string;
+  nbiclearanceDocument?: string;
+  personalDataSheetDocument?: string;
   job: {
     title: string;
     company: string;
@@ -65,13 +65,15 @@ export function JobSeekerApplications() {
     mutationFn: async (data: {
       applicationId: number;
       validId: File;
-      policeClearance: File;
-      sssProof: File;
+      nbiClearance: File;
+      personalDataSheet: File | null;
     }) => {
       const formData = new FormData();
       formData.append("validId", data.validId);
-      formData.append("policeClearance", data.policeClearance);
-      formData.append("sssProof", data.sssProof);
+      formData.append("nbiClearance", data.nbiClearance);
+      if (data.personalDataSheet) {
+        formData.append("personalDataSheet", data.personalDataSheet);
+      }
 
       const response = await fetch(`/api/applications/${data.applicationId}/documents`, {
         method: "POST",
@@ -213,7 +215,7 @@ export function JobSeekerApplications() {
                           Documents Required
                         </p>
                         <p className="text-sm text-orange-800 dark:text-orange-200 mt-1">
-                          The employer is requesting your Valid ID, Police Clearance, and SSS Proof. Please upload these documents to proceed.
+                          The employer is requesting your Valid ID and NBI Clearance. Personal Data Sheet is optional.
                         </p>
                         <Button
                           size="sm"
@@ -310,15 +312,15 @@ export function JobSeekerApplications() {
           await uploadDocumentsMutation.mutateAsync({
             applicationId: selectedApplicationForDocs.id,
             validId: documents.validId!,
-            policeClearance: documents.policeClearance!,
-            sssProof: documents.sssProof!,
+            nbiClearance: documents.nbiClearance!,
+            personalDataSheet: documents.personalDataSheet,
           });
         }}
         isLoading={uploadDocumentsMutation.isPending}
         uploadedDocuments={{
           validId: !!selectedApplicationForDocs?.validIdDocument,
-          policeClearance: !!selectedApplicationForDocs?.policeClearanceDocument,
-          sssProof: !!selectedApplicationForDocs?.sssProofDocument,
+          nbiClearance: !!selectedApplicationForDocs?.nbiclearanceDocument,
+          personalDataSheet: !!selectedApplicationForDocs?.personalDataSheetDocument,
         }}
       />
     </div>
