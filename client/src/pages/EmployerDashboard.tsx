@@ -68,6 +68,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { PILI_BARANGAYS, JOB_CATEGORIES } from "@shared/barangays";
 import EmployerScouting from "@/components/EmployerScouting";
 import { ApplicationProgressStepper } from "@/components/ApplicationProgressStepper";
+import { ApplicationStatusModal } from "@/components/ApplicationStatusModal";
 
 export function EmployerDashboard() {
   const { toast } = useToast();
@@ -96,6 +97,10 @@ export function EmployerDashboard() {
   // Not proceeding modal state
   const [showNotProceedingModal, setShowNotProceedingModal] = useState(false);
   const [notProceedingReason, setNotProceedingReason] = useState("");
+
+  // Status update modal state
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [statusModalApplication, setStatusModalApplication] = useState<any>(null);
 
   const [newJob, setNewJob] = useState({
     title: "",
@@ -501,6 +506,28 @@ export function EmployerDashboard() {
   const handleNotProceeding = (app: any) => {
     setSelectedApplication(app);
     setShowNotProceedingModal(true);
+  };
+
+  const handleStatusUpdate = (status: string, reason?: string) => {
+    if (!statusModalApplication) return;
+
+    const statusMap: Record<string, string> = {
+      reviewed: "reviewed",
+      interviewing: "interview_scheduled",
+      hired: "hired",
+      rejected: "not_proceeding",
+    };
+
+    const mappedStatus = statusMap[status] || status;
+
+    updateApplicationMutation.mutate({
+      id: statusModalApplication.id,
+      status: mappedStatus,
+      ...(mappedStatus === "not_proceeding" && { notProceedingReason: reason }),
+    });
+
+    setShowStatusModal(false);
+    setStatusModalApplication(null);
   };
 
   const submitInterviewSchedule = () => {
@@ -1137,98 +1164,26 @@ export function EmployerDashboard() {
                       )}
                     </div>
 
-                    {/* Action Buttons - Following the workflow */}
+                    {/* Action Buttons */}
                     <div className="flex flex-col space-y-2 ml-4 min-w-[140px]">
-                      {/* Step 1: Mark as Reviewed (from Applied) */}
-                      {(app.status === "pending" || app.status === "applied") && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() =>
-                            updateApplicationMutation.mutate({
-                              id: app.id,
-                              status: "reviewed",
-                            })
-                          }
-                          disabled={updateApplicationMutation.isPending}
-                        >
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Mark Reviewed
-                        </Button>
-                      )}
-
-                      {/* Step 2: Schedule Interview (from Reviewed) */}
-                      {app.status === "reviewed" && (
+                      {/* Show update status button for active applications */}
+                      {(app.status === "pending" || 
+                        app.status === "applied" || 
+                        app.status === "reviewed" || 
+                        app.status === "interview_scheduled" || 
+                        app.status === "interview_completed") && (
                         <Button
                           size="sm"
                           variant="default"
-                          onClick={() => handleScheduleInterview(app)}
+                          onClick={() => {
+                            setStatusModalApplication(app);
+                            setShowStatusModal(true);
+                          }}
                           disabled={updateApplicationMutation.isPending}
+                          className="bg-blue-600 hover:bg-blue-700"
+                          data-testid="button-update-status"
                         >
-                          <Calendar className="h-3 w-3 mr-1" />
-                          Schedule Interview
-                        </Button>
-                      )}
-
-                      {/* Step 3: Mark Interview Completed (from Interview Scheduled) */}
-                      {app.status === "interview_scheduled" && (
-                        <Button
-                          size="sm"
-                          variant="default"
-                          onClick={() =>
-                            updateApplicationMutation.mutate({
-                              id: app.id,
-                              status: "interview_completed",
-                            })
-                          }
-                          disabled={updateApplicationMutation.isPending}
-                        >
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Interview Done
-                        </Button>
-                      )}
-
-                      {/* Step 4: Final Decision (from Interview Completed) */}
-                      {app.status === "interview_completed" && (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="default"
-                            onClick={() =>
-                              updateApplicationMutation.mutate({
-                                id: app.id,
-                                status: "hired",
-                              })
-                            }
-                            disabled={updateApplicationMutation.isPending}
-                            className="bg-green-600 hover:bg-green-700"
-                          >
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Hire
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleNotProceeding(app)}
-                            disabled={updateApplicationMutation.isPending}
-                          >
-                            <XCircle className="h-3 w-3 mr-1" />
-                            Not Proceeding
-                          </Button>
-                        </>
-                      )}
-
-                      {/* Not Proceeding option for any non-final status */}
-                      {(app.status === "reviewed" || app.status === "interview_scheduled") && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleNotProceeding(app)}
-                          disabled={updateApplicationMutation.isPending}
-                          className="text-destructive"
-                        >
-                          <XCircle className="h-3 w-3 mr-1" />
-                          Not Proceeding
+                          Update Status
                         </Button>
                       )}
 
@@ -1447,6 +1402,18 @@ export function EmployerDashboard() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Application Status Update Modal */}
+      <ApplicationStatusModal
+        isOpen={showStatusModal}
+        onClose={() => {
+          setShowStatusModal(false);
+          setStatusModalApplication(null);
+        }}
+        onUpdate={handleStatusUpdate}
+        currentStatus={statusModalApplication?.status || ""}
+        isPending={updateApplicationMutation.isPending}
+      />
     </div>
   );
 }
