@@ -17,6 +17,7 @@ import {
   Download,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { ApplicationProgressStepper } from "@/components/ApplicationProgressStepper";
 
 interface Application {
   id: number;
@@ -113,14 +114,14 @@ export function JobSeekerApplications() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-6">
           {applications.map((application) => (
             <Card
               key={application.id}
               className="hover:shadow-md transition-shadow"
             >
               <CardHeader>
-                <div className="flex justify-between items-start">
+                <div className="flex justify-between items-start mb-4">
                   <div>
                     <CardTitle className="text-lg">
                       {application.job.title}
@@ -140,11 +141,8 @@ export function JobSeekerApplications() {
                       </span>
                     </CardDescription>
                   </div>
-                  <Badge className={getStatusColor(application.status)}>
-                    {application.status.charAt(0).toUpperCase() +
-                      application.status.slice(1)}
-                  </Badge>
                 </div>
+                <ApplicationProgressStepper status={application.status} />
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

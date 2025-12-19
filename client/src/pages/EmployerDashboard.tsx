@@ -67,6 +67,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { PILI_BARANGAYS, JOB_CATEGORIES } from "@shared/barangays";
 import EmployerScouting from "@/components/EmployerScouting";
+import { ApplicationProgressStepper } from "@/components/ApplicationProgressStepper";
 
 export function EmployerDashboard() {
   const { toast } = useToast();
@@ -1001,14 +1002,14 @@ export function EmployerDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {applications.map((app: any) => (
                   <div
                     key={app.id}
                     className="flex items-start justify-between p-4 border rounded-lg"
                   >
                     <div className="flex-1">
-                      <div className="flex items-start justify-between">
+                      <div className="flex items-start justify-between mb-3">
                         <div>
                           <h3 className="font-semibold">
                             {app.firstName} {app.lastName}
@@ -1017,10 +1018,8 @@ export function EmployerDashboard() {
                             Applied for: {app.jobTitle}
                           </p>
                         </div>
-                        <Badge variant={getStatusColor(app.status)}>
-                          {getStatusLabel(app.status)}
-                        </Badge>
                       </div>
+                      <ApplicationProgressStepper status={app.status} />
                       <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground flex-wrap">
                         <span className="flex items-center gap-1">
                           <Mail className="h-3 w-3" />
