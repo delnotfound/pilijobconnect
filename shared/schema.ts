@@ -91,6 +91,7 @@ export const applications = pgTable("applications", {
   validIdDocument: text("valid_id_document"),
   nbiclearanceDocument: text("nbi_clearance_document"),
   personalDataSheetDocument: text("personal_data_sheet_document"),
+  curriculumVitaeDocument: text("curriculum_vitae_document"),
   documentsUploadedAt: timestamp("documents_uploaded_at"),
   smsNotificationSent: boolean("sms_notification_sent").notNull().default(false),
   appliedAt: timestamp("applied_at").notNull().defaultNow(),

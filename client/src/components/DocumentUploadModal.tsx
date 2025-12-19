@@ -19,12 +19,14 @@ interface DocumentUploadModalProps {
     validId: File | null;
     nbiClearance: File | null;
     personalDataSheet: File | null;
+    curriculumVitae: File | null;
   }) => Promise<void>;
   isLoading: boolean;
   uploadedDocuments?: {
     validId?: boolean;
     nbiClearance?: boolean;
     personalDataSheet?: boolean;
+    curriculumVitae?: boolean;
   };
 }
 
@@ -38,6 +40,7 @@ export function DocumentUploadModal({
   const [validId, setValidId] = useState<File | null>(null);
   const [nbiClearance, setNbiClearance] = useState<File | null>(null);
   const [personalDataSheet, setPersonalDataSheet] = useState<File | null>(null);
+  const [curriculumVitae, setCurriculumVitae] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = (
@@ -62,11 +65,13 @@ export function DocumentUploadModal({
       validId,
       nbiClearance,
       personalDataSheet,
+      curriculumVitae,
     });
 
     setValidId(null);
     setNbiClearance(null);
     setPersonalDataSheet(null);
+    setCurriculumVitae(null);
     onClose();
   };
 
@@ -168,6 +173,31 @@ export function DocumentUploadModal({
               }}
               disabled={isLoading || uploadedDocuments?.personalDataSheet}
               data-testid="input-personal-data-sheet"
+            />
+            <p className="text-xs text-muted-foreground">
+              Accepted formats: PDF, JPG, PNG (Max 5MB)
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="curriculum-vitae" className="text-sm font-medium">
+                Curriculum Vitae (Optional)
+              </Label>
+              {uploadedDocuments?.curriculumVitae && (
+                <CheckCircle className="h-4 w-4 text-green-600" />
+              )}
+            </div>
+            <Input
+              id="curriculum-vitae"
+              type="file"
+              accept="image/*,application/pdf"
+              onChange={(e) => {
+                const file = handleFileChange(e.target.files?.[0] || null);
+                if (file) setCurriculumVitae(file);
+              }}
+              disabled={isLoading || uploadedDocuments?.curriculumVitae}
+              data-testid="input-curriculum-vitae"
             />
             <p className="text-xs text-muted-foreground">
               Accepted formats: PDF, JPG, PNG (Max 5MB)
