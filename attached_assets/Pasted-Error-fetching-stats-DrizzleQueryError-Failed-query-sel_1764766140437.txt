@@ -1,0 +1,63 @@
+Error fetching stats: DrizzleQueryError: Failed query: select "id", "job_id", "applicant_id", "first_name", "middle_name", "last_name", "email", "phone", "address", "cover_letter", "resume", "status", "channel_id", "notes", "interview_date", "interview_time", "interview_venue", "interview_type", "interview_notes", "not_proceeding_reason", "sms_notification_sent", "applied_at", "updated_at" from "applications"
+params:
+    at NeonPreparedQuery.queryWithCache (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\pg-core\session.ts:74:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\node_modules\src\neon-serverless\session.ts:152:18)
+    at async DatabaseStorage.getJobStats (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\api\server\storage.ts:1151:29)
+    at async <anonymous> (C:\Users\Lyka Mae\Downloads\mamamo\PiliJobConnect\api\server\routes.ts:580:21) {
+  query: 'select "id", "job_id", "applicant_id", "first_name", "middle_name", "last_name", "email", "phone", "address", "cover_letter", "resume", "status", "channel_id", "notes", "interview_date", "interview_time", "interview_venue", "interview_type", "interview_notes", "not_proceeding_reason", "sms_notification_sent", "applied_at", "updated_at" from "applications"',
+  params: [],
+  cause: NeonDbError: column "interview_date" does not exist
+      at execute (file:///C:/Users/Lyka%20Mae/Downloads/mamamo/PiliJobConnect/node_modules/@neondatabase/serverless/index.mjs:1556:55)
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+    severity: 'ERROR',
+    code: '42703',
+    detail: undefined,
+    hint: undefined,
+    position: '170',
+    internalPosition: undefined,
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'parse_relation.c',
+    line: '3716',
+    routine: 'errorMissingColumn',
+    sourceError: undefined
+  }
+}
+8:47:33 PM [express] GET /api/stats 500 in 2238ms :: {"message":"Failed to fetch stats"}
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'parse_relation.c',
+    line: '3716',
+    routine: 'errorMissingColumn',
+    sourceError: undefined
+  }
+}
+8:47:33 PM [express] GET /api/stats 500 in 2238ms :: {"message":"Failed to fetch stats"}
+
+    internalQuery: undefined,
+    where: undefined,
+    schema: undefined,
+    table: undefined,
+    column: undefined,
+    dataType: undefined,
+    constraint: undefined,
+    file: 'parse_relation.c',
+    line: '3716',
+    routine: 'errorMissingColumn',
+    sourceError: undefined
+  }
+}
+8:47:33 PM [express] GET /api/stats 500 in 2238ms :: {"message":"Failed to fetch stats"}
+
+

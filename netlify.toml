@@ -1,0 +1,18 @@
+[build]
+  command = "npm run build"
+  functions = "netlify/functions"
+  publish = "dist"
+
+[functions]
+  node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  conditions = { NOT = [{ path = "/api/*" }] }
+
+[dev]
+  publish = "dist"
+  port = 8888
+  command = "npm run build && npm run dev:client"
