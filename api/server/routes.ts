@@ -589,12 +589,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(201).json(application);
     } catch (error) {
+      console.error("Apply endpoint error:", error);
       if (error instanceof z.ZodError) {
+        console.error("Zod validation errors:", error.errors);
         return res.status(400).json({
           message: "Invalid application data",
           errors: error.errors,
         });
       }
+      console.error("Full error object:", error);
       res.status(500).json({ message: "Failed to submit application" });
     }
   });
@@ -748,14 +751,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .json({ message: "File too large. Maximum size is 5MB." });
       }
 
-      // Store the complete base64 data URL for later download
+      // Generate unique file reference
       const uniqueId = `resume_${Date.now()}_${Math.random()
         .toString(36)
         .substr(2, 9)}`;
 
+      // Store just the file ID reference, not the entire base64 string
+      // The base64 data can be stored in memory cache or session if needed later
       res.json({
         success: true,
-        filePath: resumeData.content, // Store the complete base64 data URL
+        filePath: uniqueId, // Return just the file ID, not the entire base64
         fileId: uniqueId,
         message: "Resume uploaded successfully",
       });
@@ -807,14 +812,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .json({ message: "File too large. Maximum size is 2MB." });
       }
 
-      // Store the complete base64 data URL for later download
+      // Generate unique file reference
       const uniqueId = `cover_letter_${Date.now()}_${Math.random()
         .toString(36)
         .substr(2, 9)}`;
 
+      // Store just the file ID reference, not the entire base64 string
       res.json({
         success: true,
-        filePath: coverLetterData.content, // Store the complete base64 data URL
+        filePath: uniqueId, // Return just the file ID, not the entire base64
         fileId: uniqueId,
         message: "Cover letter uploaded successfully",
       });
@@ -1111,7 +1117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/applications/:id/documents", async (req, res) => {
     try {
       const applicationId = parseInt(req.params.id);
-      
+
       // Get the application to find employer and job details
       const application = await storage.getApplicationById(applicationId);
       if (!application) {
@@ -1136,13 +1142,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // 3. Store URLs in database
 
       // For now, just mark as uploaded and update database
-      const updatedApplication = await storage.updateApplication(applicationId, {
-        validIdDocument: "uploaded",
-        nbiclearanceDocument: "uploaded",
-        personalDataSheetDocument: "uploaded",
-        documentsUploadedAt: new Date(),
-        updatedAt: new Date(),
-      });
+      const updatedApplication = await storage.updateApplication(
+        applicationId,
+        {
+          validIdDocument: "uploaded",
+          nbiclearanceDocument: "uploaded",
+          personalDataSheetDocument: "uploaded",
+          documentsUploadedAt: new Date(),
+          updatedAt: new Date(),
+        }
+      );
 
       // Send SMS notification to employer
       if (employer.phone) {
@@ -2570,12 +2579,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Calculate rates and filter out categories with no applications
       const categoryHiringData = Object.entries(categoryHiring)
         .map(([category, data]) => {
-          const rate = data.applications > 0
-            ? parseFloat(((data.hired / data.applications) * 100).toFixed(1))
-            : 0;
-          return { category, applications: data.applications, hired: data.hired, rate };
+          const rate =
+            data.applications > 0
+              ? parseFloat(((data.hired / data.applications) * 100).toFixed(1))
+              : 0;
+          return {
+            category,
+            applications: data.applications,
+            hired: data.hired,
+            rate,
+          };
         })
-        .filter(data => data.applications > 0) // Only show categories with applications
+        .filter((data) => data.applications > 0) // Only show categories with applications
         .sort((a, b) => b.rate - a.rate);
 
       res.json({
