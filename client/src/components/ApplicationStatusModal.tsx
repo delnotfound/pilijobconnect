@@ -14,6 +14,7 @@ interface ApplicationStatusModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUpdate: (status: string, reason?: string) => void;
+  onInterviewScheduleRequested?: () => void;
   currentStatus: string;
   isPending: boolean;
 }
@@ -22,6 +23,7 @@ export function ApplicationStatusModal({
   isOpen,
   onClose,
   onUpdate,
+  onInterviewScheduleRequested,
   currentStatus,
   isPending,
 }: ApplicationStatusModalProps) {
@@ -47,7 +49,7 @@ export function ApplicationStatusModal({
       description: "Request applicant to submit required documents",
     },
     {
-      value: "interviewing",
+      value: "interview_scheduled",
       label: "Interview Scheduled",
       description: "Applicant is invited for an interview",
     },
@@ -57,7 +59,7 @@ export function ApplicationStatusModal({
       description: "Applicant has been accepted",
     },
     {
-      value: "rejected",
+      value: "not_proceeding",
       label: "Not Selected",
       description: "Application will not proceed",
     },
@@ -66,12 +68,25 @@ export function ApplicationStatusModal({
   const handleSave = () => {
     if (!selectedStatus) return;
 
-    if (selectedStatus === "rejected" && !notSelectedReason.trim()) {
+    if (selectedStatus === "not_proceeding" && !notSelectedReason.trim()) {
       alert("Please provide a reason for not selecting this applicant");
       return;
     }
 
-    onUpdate(selectedStatus, selectedStatus === "rejected" ? notSelectedReason : undefined);
+    // Special handling for interview_scheduled: trigger interview modal instead of direct update
+    if (selectedStatus === "interview_scheduled") {
+      onClose(); // Close the status modal first
+      // Call the interview schedule callback to open the interview modal
+      if (onInterviewScheduleRequested) {
+        onInterviewScheduleRequested();
+      }
+      return;
+    }
+
+    onUpdate(
+      selectedStatus,
+      selectedStatus === "not_proceeding" ? notSelectedReason : undefined
+    );
     onClose();
   };
 
@@ -117,7 +132,7 @@ export function ApplicationStatusModal({
             </div>
           </RadioGroup>
 
-          {selectedStatus === "rejected" && (
+          {selectedStatus === "not_proceeding" && (
             <div className="space-y-2 mt-4 p-3 bg-red-50 dark:bg-red-950 rounded-md">
               <Label htmlFor="reason" className="text-sm font-medium">
                 Reason for not selecting *

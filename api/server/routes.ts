@@ -9,6 +9,7 @@ import {
   sendInterviewScheduledSMS,
   sendNotProceedingSMS,
   sendInterviewCompletedSMS,
+  sendDocumentsUploadedSMS,
 } from "./textbee.js";
 import cookieParser from "cookie-parser";
 import { storage } from "./storage.js";
@@ -551,7 +552,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const application = await storage.createApplication(validatedData);
 
       if (!application) {
-        return res.status(500).json({ message: "Failed to create application" });
+        return res
+          .status(500)
+          .json({ message: "Failed to create application" });
       }
 
       // Send SMS confirmation to applicant
@@ -562,13 +565,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           job.title,
           job.company
         );
-
-        if (smsSuccess && application.id) {
-          // Update application to mark SMS as sent
-          await storage.updateApplication(application.id, {
-            smsNotificationSent: true,
-          });
-        }
 
         // Send notification to employer if phone number is available
         let employerPhone = job.phone;
@@ -950,6 +946,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Download required documents from applications
+  app.get("/api/download/document/:applicationId/:docType", async (req, res) => {
+    try {
+      const applicationId = parseInt(req.params.applicationId);
+      const docType = req.params.docType; // validId, nbiClearance, personalDataSheet, curriculumVitae
+
+      const application = await storage.getApplicationById(applicationId);
+      if (!application) {
+        return res.status(404).json({ message: "Application not found" });
+      }
+
+      let documentPath: string | null = null;
+      let documentName = "";
+
+      switch (docType) {
+        case "validId":
+          documentPath = application.validIdDocument;
+          documentName = "Valid ID";
+          break;
+        case "nbiClearance":
+          documentPath = application.nbiClearanceDocument;
+          documentName = "NBI Clearance";
+          break;
+        case "personalDataSheet":
+          documentPath = application.personalDataSheetDocument;
+          documentName = "Personal Data Sheet";
+          break;
+        case "curriculumVitae":
+          documentPath = application.curriculumVitaeDocument;
+          documentName = "Curriculum Vitae";
+          break;
+        default:
+          return res.status(400).json({ message: "Invalid document type" });
+      }
+
+      if (!documentPath) {
+        return res
+          .status(404)
+          .json({ message: `${documentName} document not found` });
+      }
+
+      // For now, return the document reference
+      // In a production system with actual file storage, you would retrieve the actual file from S3 or similar
+      res.json({
+        success: true,
+        documentPath,
+        documentName,
+        applicantName: `${application.firstName} ${application.lastName}`,
+        message: `${documentName} reference retrieved successfully`,
+      });
+    } catch (error) {
+      console.error("Error downloading document:", error);
+      res.status(500).json({ message: "Failed to download document" });
+    }
+  });
+
   // Get job seeker applications - properly filtered by authenticated user
   app.get(
     "/api/jobseeker/applications",
@@ -1028,6 +1080,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Add not proceeding reason if applicable
       if (status === "not_proceeding" && notProceedingReason) {
         updateData.notProceedingReason = notProceedingReason;
+      }
+
+      // Set additional requirements flag when status is "additional_requirements"
+      if (status === "additional_requirements") {
+        updateData.additionalRequirementsRequested = true;
+        updateData.additionalRequirementsRequestedAt = new Date();
       }
 
       const updatedApplication = await storage.updateApplication(
@@ -1140,35 +1198,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Employer not found" });
       }
 
-      // In a real implementation, you would:
-      // 1. Extract files from req.files
-      // 2. Upload to cloud storage (S3, etc.)
-      // 3. Store URLs in database
+      // Generate unique IDs for document references
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substr(2, 9);
 
-      // For now, just mark as uploaded and update database
+      // Create file references - in a real app these would be S3 URLs
+      const validIdPath = req.body?.validId
+        ? `doc_validid_${timestamp}_${randomId}`
+        : null;
+      const nbiClearancePath = req.body?.nbiClearance
+        ? `doc_nbi_${timestamp}_${randomId}`
+        : null;
+      const personalDataSheetPath = req.body?.personalDataSheet
+        ? `doc_pds_${timestamp}_${randomId}`
+        : null;
+      const curriculumVitaePath = req.body?.curriculumVitae
+        ? `doc_cv_${timestamp}_${randomId}`
+        : null;
+
+      // Update application with document references
+      const updateData: any = {
+        documentsUploadedAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      if (validIdPath) {
+        updateData.validIdDocument = validIdPath;
+      }
+      if (nbiClearancePath) {
+        updateData.nbiClearanceDocument = nbiClearancePath;
+      }
+      if (personalDataSheetPath) {
+        updateData.personalDataSheetDocument = personalDataSheetPath;
+      }
+      if (curriculumVitaePath) {
+        updateData.curriculumVitaeDocument = curriculumVitaePath;
+      }
+
       const updatedApplication = await storage.updateApplication(
         applicationId,
-        {
-          validIdDocument: "uploaded",
-          nbiclearanceDocument: "uploaded",
-          personalDataSheetDocument: "uploaded",
-          documentsUploadedAt: new Date(),
-          updatedAt: new Date(),
-        }
+        updateData
       );
 
-      // Send SMS notification to employer
+      // Send SMS notification to employer about documents uploaded
       if (employer.phone) {
         try {
-          await sendApplicationStatusUpdateSMS(
+          const applicantName = `${application.firstName} ${application.lastName}`;
+          await sendDocumentsUploadedSMS(
             employer.phone,
-            application.firstName + " " + application.lastName,
-            job.title,
-            job.company,
-            "documents_uploaded"
+            applicantName,
+            job.title
           );
         } catch (smsError) {
           console.error("SMS notification error:", smsError);
+          // Don't fail the request if SMS fails
         }
       }
 

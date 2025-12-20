@@ -206,31 +206,76 @@ export function JobSeekerApplications() {
                 <ApplicationProgressStepper status={application.status} />
               </CardHeader>
               <CardContent>
-                {application.status === "additional_requirements" && application.additionalRequirementsRequested && (
-                  <div className="mb-4 p-3 bg-orange-50 dark:bg-orange-950 rounded-md border border-orange-200 dark:border-orange-800">
-                    <div className="flex items-start gap-3">
-                      <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm font-medium text-orange-900 dark:text-orange-100">
-                          Documents Required
-                        </p>
-                        <p className="text-sm text-orange-800 dark:text-orange-200 mt-1">
-                          The employer is requesting your Valid ID and NBI Clearance. Personal Data Sheet is optional.
-                        </p>
-                        <Button
-                          size="sm"
-                          className="mt-2 bg-orange-600 hover:bg-orange-700"
-                          onClick={() => {
-                            setSelectedApplicationForDocs(application);
-                            setShowDocumentModal(true);
-                          }}
-                          data-testid="button-upload-documents"
-                        >
-                          Upload Documents
-                        </Button>
+                {application.status === "additional_requirements" && (
+                  <>
+                    {application.validIdDocument ||
+                    application.nbiClearanceDocument ||
+                    application.personalDataSheetDocument ||
+                    application.curriculumVitaeDocument ? (
+                      // Green box - documents uploaded
+                      <div className="mb-4 p-3 bg-green-50 dark:bg-green-950 rounded-md border border-green-200 dark:border-green-800">
+                        <div className="flex items-start gap-3">
+                          <div className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0">✓</div>
+                          <div>
+                            <p className="text-sm font-medium text-green-900 dark:text-green-100">
+                              Documents Uploaded
+                            </p>
+                            <p className="text-sm text-green-800 dark:text-green-200 mt-1">
+                              Your documents have been successfully submitted. The employer will review them soon.
+                            </p>
+                            <div className="mt-3 space-y-2">
+                              {application.validIdDocument && (
+                                <div className="text-xs text-green-700 dark:text-green-300">
+                                  ✓ Valid ID
+                                </div>
+                              )}
+                              {application.nbiClearanceDocument && (
+                                <div className="text-xs text-green-700 dark:text-green-300">
+                                  ✓ NBI Clearance
+                                </div>
+                              )}
+                              {application.personalDataSheetDocument && (
+                                <div className="text-xs text-green-700 dark:text-green-300">
+                                  ✓ Personal Data Sheet
+                                </div>
+                              )}
+                              {application.curriculumVitaeDocument && (
+                                <div className="text-xs text-green-700 dark:text-green-300">
+                                  ✓ Curriculum Vitae
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    ) : (
+                      // Orange box - waiting to upload
+                      <div className="mb-4 p-3 bg-orange-50 dark:bg-orange-950 rounded-md border border-orange-200 dark:border-orange-800">
+                        <div className="flex items-start gap-3">
+                          <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <p className="text-sm font-medium text-orange-900 dark:text-orange-100">
+                              Documents Required
+                            </p>
+                            <p className="text-sm text-orange-800 dark:text-orange-200 mt-1">
+                              The employer is requesting your Valid ID and NBI Clearance. Personal Data Sheet is optional.
+                            </p>
+                            <Button
+                              size="sm"
+                              className="mt-2 bg-orange-600 hover:bg-orange-700"
+                              onClick={() => {
+                                setSelectedApplicationForDocs(application);
+                                setShowDocumentModal(true);
+                              }}
+                              data-testid="button-upload-documents"
+                            >
+                              Upload Documents
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>

@@ -405,3 +405,48 @@ export async function sendInterviewCompletedSMS(
     return false;
   }
 }
+
+export async function sendDocumentsUploadedSMS(
+  phone: string,
+  applicantName: string,
+  jobTitle: string
+): Promise<boolean> {
+  if (!TEXTBEE_API_KEY || !TEXTBEE_DEVICE_ID) {
+    console.warn(
+      "TEXTBEE_API_KEY or TEXTBEE_DEVICE_ID not configured, skipping SMS"
+    );
+    return false;
+  }
+
+  try {
+    const message = `Hi! New documents have been submitted by ${applicantName} for the ${jobTitle} position. Check your Pili Jobs dashboard to review the uploaded files.`;
+
+    const response = await fetch(
+      `${TEXTBEE_API_URL}/api/v1/gateway/devices/${TEXTBEE_DEVICE_ID}/send-sms`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": TEXTBEE_API_KEY,
+        },
+        body: JSON.stringify({
+          recipients: [phone],
+          message: message,
+        }),
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error("Failed to send documents uploaded SMS:", result);
+      return false;
+    }
+
+    console.log("Documents uploaded SMS sent successfully:", result);
+    return true;
+  } catch (error) {
+    console.error("Error sending documents uploaded SMS:", error);
+    return false;
+  }
+}
