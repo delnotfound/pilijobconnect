@@ -1,0 +1,14 @@
+node_modules
+.git
+*.log
+.env
+.env.local
+pili_jobs.db
+migrations
+api/server/db.local.ts
+api/server/db.sqlite.ts
+api/server/for-vercel-entry.ts
+api/server/index.ts
+api/server/scripts
+api/server/vite.ts
+

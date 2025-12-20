@@ -1,0 +1,314 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Briefcase,
+  MapPin,
+  Calendar,
+  Clock,
+  FileText,
+  Download,
+  AlertCircle,
+} from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import AdditionalDocsModal from "./AdditionalDocsModal";
+import { ApplicationProgressTracker } from "./ApplicationProgressTracker";
+
+interface Application {
+  id: number;
+  jobId: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address?: string;
+  coverLetter?: string;
+  resume?: string;
+  status: string;
+  requiredDocuments?: string;
+  appliedAt: string;
+  job: {
+    title: string;
+    company: string;
+    location: string;
+    type: string;
+    salary: string;
+  };
+}
+
+export function JobSeekerApplications() {
+  const { user } = useAuth();
+  const [showDocsModal, setShowDocsModal] = useState(false);
+  const [selectedApp, setSelectedApp] = useState<Application | null>(null);
+  const [requiredDocs, setRequiredDocs] = useState<string[]>([]);
+
+  const { data: applications = [], isLoading } = useQuery<Application[]>({
+    queryKey: ["/api/jobseeker/applications"],
+    enabled: !!user && user.role === "jobseeker",
+  });
+
+  const handleSubmitDocs = (application: Application) => {
+    setSelectedApp(application);
+    // Parse required documents if available
+    if (application.requiredDocuments) {
+      try {
+        setRequiredDocs(JSON.parse(application.requiredDocuments));
+      } catch {
+        setRequiredDocs(["Valid_ID", "NBI_Clearance"]);
+      }
+    } else {
+      setRequiredDocs(["Valid_ID", "NBI_Clearance"]);
+    }
+    setShowDocsModal(true);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "pending":
+      case "applied":
+        return "bg-yellow-100 text-yellow-800";
+      case "reviewed":
+        return "bg-blue-100 text-blue-800";
+      case "additional_docs_required":
+        return "bg-amber-100 text-amber-800";
+      case "interview_scheduled":
+        return "bg-purple-100 text-purple-800";
+      case "interview_completed":
+        return "bg-indigo-100 text-indigo-800";
+      case "hired":
+        return "bg-green-100 text-green-800";
+      case "not_proceeding":
+        return "bg-red-100 text-red-800";
+      case "rejected":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "pending":
+      case "applied":
+        return "Applied";
+      case "reviewed":
+        return "Reviewed";
+      case "additional_docs_required":
+        return "Additional Documents Required";
+      case "interview_scheduled":
+        return "Interview Scheduled";
+      case "interview_completed":
+        return "Interview Completed";
+      case "hired":
+        return "Hired";
+      case "not_proceeding":
+        return "Not Proceeding";
+      case "rejected":
+        return "Rejected";
+      default:
+        return status.charAt(0).toUpperCase() + status.slice(1);
+    }
+  };
+
+  const downloadResume = (
+    applicationId: number,
+    firstName: string,
+    lastName: string
+  ) => {
+    const link = document.createElement("a");
+    link.href = `/api/download/resume/${applicationId}`;
+    link.download = `${firstName}_${lastName}_resume`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">My Applications</h1>
+          <p className="text-muted-foreground">Track your job applications</p>
+        </div>
+        <div className="text-sm text-gray-600">
+          {applications.length} application
+          {applications.length !== 1 ? "s" : ""}
+        </div>
+      </div>
+
+      {applications.length === 0 ? (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Briefcase className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              No Applications Yet
+            </h3>
+            <p className="text-gray-600">
+              Start applying for jobs to see your applications here.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {applications.map((application) => (
+            <Card
+              key={application.id}
+              className="hover:shadow-md transition-shadow"
+            >
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-lg">
+                      {application.job.title}
+                    </CardTitle>
+                    <CardDescription className="flex items-center gap-4 mt-1">
+                      <span className="flex items-center">
+                        <Briefcase className="mr-1 h-4 w-4" />
+                        {application.job.company}
+                      </span>
+                      <span className="flex items-center">
+                        <MapPin className="mr-1 h-4 w-4" />
+                        {application.job.location}
+                      </span>
+                      <span className="flex items-center">
+                        <Clock className="mr-1 h-4 w-4" />
+                        {application.job.type}
+                      </span>
+                    </CardDescription>
+                  </div>
+                  <Badge className={getStatusColor(application.status)}>
+                    {getStatusLabel(application.status)}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {/* Application Progress Tracker */}
+                <div className="mb-6">
+                  <ApplicationProgressTracker status={application.status} />
+                </div>
+
+                {application.status === "additional_docs_required" && (
+                  <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md flex items-start gap-2">
+                    <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="font-medium text-amber-900 text-sm">
+                        Action Required
+                      </p>
+                      <p className="text-amber-800 text-sm">
+                        The employer requires additional documents to proceed with your application. Please upload the required documents to move forward.
+                      </p>
+                    </div>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">
+                      <Calendar className="inline mr-1 h-3 w-3" />
+                      Applied:{" "}
+                      {new Date(application.appliedAt).toLocaleDateString()}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Salary: {application.job.salary}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    {application.resume && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          downloadResume(
+                            application.id,
+                            application.firstName,
+                            application.lastName
+                          )
+                        }
+                      >
+                        <Download className="mr-1 h-3 w-3" />
+                        Resume
+                      </Button>
+                    )}
+                    {application.coverLetter && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          if (application.coverLetter?.startsWith("data:")) {
+                            // It's a file - download it
+                            window.open(
+                              `/api/download/cover-letter/${application.id}`,
+                              "_blank"
+                            );
+                          } else {
+                            // It's text - show in alert (or you could create a modal)
+                            alert(application.coverLetter);
+                          }
+                        }}
+                      >
+                        <FileText className="mr-1 h-3 w-3" />
+                        {application.coverLetter?.startsWith("data:")
+                          ? "Download"
+                          : "View"}{" "}
+                        Cover Letter
+                      </Button>
+                    )}
+                    {application.status === "additional_docs_required" && (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => handleSubmitDocs(application)}
+                        className="bg-amber-600 hover:bg-amber-700"
+                      >
+                        <FileText className="mr-1 h-3 w-3" />
+                        Submit Docs
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                {application.coverLetter &&
+                  !application.coverLetter.startsWith("data:") && (
+                    <div className="mt-3">
+                      <p className="text-sm font-medium">Cover Letter:</p>
+                      <div className="text-sm text-muted-foreground mt-1 max-h-24 overflow-y-auto">
+                        {application.coverLetter || "No cover letter provided"}
+                      </div>
+                    </div>
+                  )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Additional Docs Modal */}
+      <AdditionalDocsModal
+        isOpen={showDocsModal}
+        onClose={() => {
+          setShowDocsModal(false);
+          setSelectedApp(null);
+          setRequiredDocs([]);
+        }}
+        applicationId={selectedApp?.id || 0}
+        requiredDocuments={requiredDocs}
+      />
+    </div>
+  );
+}
