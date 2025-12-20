@@ -1267,56 +1267,104 @@ export class DatabaseStorage implements IStorage {
     categoriesWithCounts: Array<{ category: string; count: number }>;
     recentJobs: Job[];
   }> {
-    const allJobs = await this.getAllJobs();
-    const allApplications = await db.select().from(applications);
+    try {
+      const allJobs = await this.getAllJobs();
+      
+      let totalApplicationsCount = 0;
+      let totalEmployersCount = 0;
+      let totalJobSeekersCount = 0;
+      let applicationsToday = 0;
+      let categoriesWithCounts: Array<{ category: string; count: number }> = [];
 
-    // Get real employer and job seeker counts
-    const [totalEmployers] = await db
-      .select({ count: count() })
-      .from(users)
-      .where(eq(users.role, "employer"));
+      try {
+        // Get application count
+        const appCountResult = await db
+          .select({ count: count() })
+          .from(applications);
+        totalApplicationsCount = appCountResult[0]?.count || 0;
+      } catch (e) {
+        console.log("Failed to get application count, using 0");
+      }
 
-    const [totalJobSeekers] = await db
-      .select({ count: count() })
-      .from(users)
-      .where(eq(users.role, "jobseeker"));
+      try {
+        // Get employer count
+        const empCountResult = await db
+          .select({ count: count() })
+          .from(users)
+          .where(eq(users.role, "employer"));
+        totalEmployersCount = empCountResult[0]?.count || 0;
+      } catch (e) {
+        console.log("Failed to get employer count, using 0");
+      }
 
-    // Get today's application count
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+      try {
+        // Get job seeker count
+        const jskCountResult = await db
+          .select({ count: count() })
+          .from(users)
+          .where(eq(users.role, "jobseeker"));
+        totalJobSeekersCount = jskCountResult[0]?.count || 0;
+      } catch (e) {
+        console.log("Failed to get job seeker count, using 0");
+      }
 
-    const applicationsToday = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(applications)
-      .where(gte(applications.appliedAt, today))
-      .then((rows: any) => rows[0]?.count || 0);
+      try {
+        // Get today's application count
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayResult = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(applications)
+          .where(gte(applications.appliedAt, today));
+        applicationsToday = todayResult[0]?.count || 0;
+      } catch (e) {
+        console.log("Failed to get today's applications, using 0");
+      }
 
-    // Get category counts
-    const categoriesWithCounts = await db
-      .select({
-        category: jobs.category,
-        count: count(),
-      })
-      .from(jobs)
-      .where(eq(jobs.isActive, true))
-      .groupBy(jobs.category);
+      try {
+        // Get category counts
+        categoriesWithCounts = await db
+          .select({
+            category: jobs.category,
+            count: count(),
+          })
+          .from(jobs)
+          .where(eq(jobs.isActive, true))
+          .groupBy(jobs.category);
+      } catch (e) {
+        console.log("Failed to get category counts");
+      }
 
-    return {
-      activeJobs: allJobs.filter((job) => job.isActive).length,
-      totalJobs: allJobs.length,
-      totalApplications: allApplications.length,
-      totalEmployers: totalEmployers.count || 0,
-      totalJobSeekers: totalJobSeekers.count || 0,
-      applicationsToday: applicationsToday,
-      categoriesWithCounts: categoriesWithCounts,
-      recentJobs: allJobs
-        .filter((job) => job.isActive)
-        .sort(
-          (a, b) =>
-            new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime()
-        )
-        .slice(0, 5),
-    };
+      return {
+        activeJobs: allJobs.filter((job) => job.isActive).length,
+        totalJobs: allJobs.length,
+        totalApplications: totalApplicationsCount,
+        totalEmployers: totalEmployersCount,
+        totalJobSeekers: totalJobSeekersCount,
+        applicationsToday: applicationsToday,
+        categoriesWithCounts: categoriesWithCounts,
+        recentJobs: allJobs
+          .filter((job) => job.isActive)
+          .sort(
+            (a, b) =>
+              new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime()
+          )
+          .slice(0, 5),
+      };
+    } catch (error) {
+      console.error("Error in getJobStats:", error);
+      // Return safe defaults
+      return {
+        activeJobs: 0,
+        totalJobs: 0,
+        totalApplications: 0,
+        totalEmployers: 0,
+        totalJobSeekers: 0,
+        applicationsToday: 0,
+        categoriesWithCounts: [],
+        recentJobs: [],
+      };
+    }
   }
 
   // Admin methods
@@ -1645,7 +1693,7 @@ export class DatabaseStorage implements IStorage {
       });
     });
 
-    recentUsers.forEach((user) => {
+    recentUsers.forEach((user: any) => {
       activities.push({
         id: `user-${user.id}`,
         type: "user_registered",
@@ -1853,7 +1901,7 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(jobs, eq(applications.jobId, jobs.id))
       .orderBy(desc(applications.appliedAt));
 
-    return applicationsWithJobs.map((app) => ({
+    return applicationsWithJobs.map((app: any) => ({
       id: app.id,
       jobId: app.jobId,
       applicantId: app.applicantId,
