@@ -445,9 +445,11 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
                 type="text"
                 value={applicationForm.firstName}
                 onChange={(e) => updateForm("firstName", e.target.value)}
+                disabled
                 required
                 aria-invalid={!!errors.firstName}
                 aria-describedby="firstNameError"
+                className="bg-gray-100 cursor-not-allowed"
               />
               {errors.firstName && <p id="firstNameError" className="text-red-500 text-sm">{errors.firstName}</p>}
             </div>
@@ -458,8 +460,10 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
                 type="text"
                 value={applicationForm.middleName}
                 onChange={(e) => updateForm("middleName", e.target.value)}
+                disabled
                 aria-invalid={!!errors.middleName}
                 aria-describedby="middleNameError"
+                className="bg-gray-100 cursor-not-allowed"
               />
               {errors.middleName && <p id="middleNameError" className="text-red-500 text-sm">{errors.middleName}</p>}
             </div>
@@ -470,9 +474,11 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
                 type="text"
                 value={applicationForm.lastName}
                 onChange={(e) => updateForm("lastName", e.target.value)}
+                disabled
                 required
                 aria-invalid={!!errors.lastName}
                 aria-describedby="lastNameError"
+                className="bg-gray-100 cursor-not-allowed"
               />
               {errors.lastName && <p id="lastNameError" className="text-red-500 text-sm">{errors.lastName}</p>}
             </div>
@@ -485,9 +491,11 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
               type="email"
               value={applicationForm.email}
               onChange={(e) => updateForm("email", e.target.value)}
+              disabled
               required
               aria-invalid={!!errors.email}
               aria-describedby="emailError"
+              className="bg-gray-100 cursor-not-allowed"
             />
             {errors.email && <p id="emailError" className="text-red-500 text-sm">{errors.email}</p>}
           </div>
@@ -508,7 +516,8 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
                   updateForm("phone", cleaned);
                 }}
                 placeholder="9171234567"
-                className="rounded-l-none"
+                disabled
+                className="rounded-l-none bg-gray-100 cursor-not-allowed"
                 required
                 aria-invalid={!!errors.phone}
                 aria-describedby="phoneError"

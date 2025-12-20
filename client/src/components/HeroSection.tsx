@@ -11,7 +11,7 @@ import {
 import { Search, MapPin } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { LOCATION_OPTIONS, JOB_CATEGORIES } from "./../../../shared/barangays";
-import PiliBackground from "@assets/Pili.jpeg";
+import PiliBackground from "../assets/Pili.jpeg";
 
 interface HeroSectionProps {
   searchQuery: string;

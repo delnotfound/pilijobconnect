@@ -515,9 +515,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   // Apply for a job
-  app.post("/api/jobs/:id/apply", async (req, res) => {
+  app.post("/api/jobs/:id/apply", async (req: any, res) => {
     try {
+      // Validate session
+      const sessionToken = req.cookies?.session;
+      if (!sessionToken) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const userObject = await validateSession(sessionToken);
+      if (!userObject) {
+        return res.status(401).json({ message: "Invalid or expired session" });
+      }
+
       const jobId = parseInt(req.params.id);
+      const userId = userObject.id;
+
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
       const job = await storage.getJob(jobId);
 
       if (!job) {
@@ -527,6 +544,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const applicationData = {
         ...req.body,
         jobId: jobId,
+        applicantId: userId,
       };
 
       const validatedData = insertApplicationSchema.parse(applicationData);
