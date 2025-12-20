@@ -550,6 +550,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertApplicationSchema.parse(applicationData);
       const application = await storage.createApplication(validatedData);
 
+      if (!application) {
+        return res.status(500).json({ message: "Failed to create application" });
+      }
+
       // Send SMS confirmation to applicant
       try {
         const smsSuccess = await sendApplicationConfirmationSMS(
@@ -559,7 +563,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           job.company
         );
 
-        if (smsSuccess) {
+        if (smsSuccess && application.id) {
           // Update application to mark SMS as sent
           await storage.updateApplication(application.id, {
             smsNotificationSent: true,
