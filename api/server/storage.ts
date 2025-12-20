@@ -946,15 +946,14 @@ export class DatabaseStorage implements IStorage {
   async createApplication(
     insertApplication: InsertApplication
   ): Promise<Application> {
-    const result = await db
+    await db
       .insert(applications)
       .values({
         ...insertApplication,
-        appliedAt: new Date(), // Store as Date object
+        appliedAt: new Date(),
         status: "pending",
         updatedAt: new Date(),
-      })
-      .returning();
+      });
 
     // Increment applicant count for the job
     await db
@@ -962,7 +961,19 @@ export class DatabaseStorage implements IStorage {
       .set({ applicantCount: sql`${jobs.applicantCount} + 1` })
       .where(eq(jobs.id, insertApplication.jobId));
 
-    return result[0];
+    // Query the application back
+    const appList = await db
+      .select()
+      .from(applications)
+      .where(eq(applications.jobId, insertApplication.jobId))
+      .limit(10);
+
+    if (!appList || appList.length === 0) {
+      throw new Error("Failed to create application");
+    }
+
+    // Return the most recent application for this job
+    return appList[appList.length - 1];
   }
 
   async updateApplication(
