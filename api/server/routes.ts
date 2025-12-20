@@ -615,33 +615,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const stats = await storage.getJobStats();
 
-      // Get actual hired this month count from PESO stats
-      const pesoStats = await storage.getPesoStats();
-      const currentMonth = new Date().toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-      });
-      const currentMonthStats = pesoStats.monthlyStats.find(
-        (m) => m.month === currentMonth
-      );
-      const hiredThisMonth = currentMonthStats?.hired || 0;
+      // Try to get PESO stats, but don't fail if it errors
+      let hiredThisMonth = 0;
+      try {
+        const pesoStats = await storage.getPesoStats();
+        const currentMonth = new Date().toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+        });
+        const currentMonthStats = pesoStats.monthlyStats.find(
+          (m) => m.month === currentMonth
+        );
+        hiredThisMonth = currentMonthStats?.hired || 0;
+      } catch (pesoError) {
+        console.log("Could not fetch PESO stats, using 0 for hired this month");
+        hiredThisMonth = 0;
+      }
 
       // Convert to expected format with real data
       const formattedStats = {
         activeJobs: stats.activeJobs,
         employers: stats.totalEmployers,
-        hiredThisMonth: hiredThisMonth, // Use actual hired count from PESO stats
-        jobSeekers: stats.totalJobSeekers, // Use real job seeker count
+        hiredThisMonth: hiredThisMonth,
+        jobSeekers: stats.totalJobSeekers,
         totalJobs: stats.totalJobs,
         totalApplications: stats.totalApplications,
         categoriesWithCounts: stats.categoriesWithCounts,
-        recentJobs: stats.recentJobs.slice(0, 3), // Only show 3 recent jobs
+        recentJobs: stats.recentJobs.slice(0, 3),
       };
 
       res.json(formattedStats);
     } catch (error) {
       console.error("Error fetching stats:", error);
-      res.status(500).json({ message: "Failed to fetch stats" });
+      // Return minimal safe stats on error
+      res.json({
+        activeJobs: 0,
+        employers: 0,
+        hiredThisMonth: 0,
+        jobSeekers: 0,
+        totalJobs: 0,
+        totalApplications: 0,
+        categoriesWithCounts: [],
+        recentJobs: [],
+      });
     }
   });
 

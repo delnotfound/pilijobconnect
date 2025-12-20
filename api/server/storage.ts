@@ -2213,6 +2213,7 @@ export class DatabaseStorage implements IStorage {
       rate: number;
     }>;
   }> {
+    try {
     const allApplications = await this.getAllApplicationsWithJobs();
     const allJobs = await this.getAllJobs({ includeInactive: true });
     const allUsers = await this.getAllUsers();
@@ -2371,6 +2372,20 @@ export class DatabaseStorage implements IStorage {
         .map(([category, data]) => ({ category, ...data }))
         .sort((a, b) => b.rate - a.rate),
     };
+    } catch (error) {
+      console.error("Error in getPesoStats:", error);
+      // Return safe defaults when query fails
+      return {
+        placementRate: 0,
+        totalApplications: 0,
+        totalHired: 0,
+        localEmploymentRate: 0,
+        totalLocalJobs: 0,
+        totalJobs: 0,
+        monthlyStats: [],
+        categoryHiring: [],
+      };
+    }
   }
 
   async getUsers(): Promise<User[]> {
