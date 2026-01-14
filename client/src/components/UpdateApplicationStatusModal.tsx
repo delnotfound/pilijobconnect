@@ -64,8 +64,7 @@ export function UpdateApplicationStatusModal({
       label: "Interview Done",
       description: "Interview has been completed",
       icon: CheckCircle,
-      show:
-        normalizedStatus === "interview_scheduled",
+      show: normalizedStatus === "interview_scheduled",
     },
     {
       value: "hired",
@@ -105,7 +104,7 @@ export function UpdateApplicationStatusModal({
     } else {
       onStatusSelect(selectedStatus);
     }
-    
+
     setSelectedStatus("");
     onClose();
   };

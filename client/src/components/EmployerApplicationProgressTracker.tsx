@@ -48,8 +48,8 @@ export function EmployerApplicationProgressTracker({
                   isCompleted
                     ? "bg-blue-500 text-white"
                     : isCurrent
-                      ? "bg-amber-400 text-white"
-                      : "bg-gray-300 text-gray-500"
+                    ? "bg-amber-400 text-white"
+                    : "bg-gray-300 text-gray-500"
                 }`}
                 title={step.label}
               >
@@ -88,8 +88,8 @@ export function EmployerApplicationProgressTracker({
                     isCompleted
                       ? "bg-blue-500 text-white"
                       : isCurrent
-                        ? "bg-amber-400 text-white"
-                        : "bg-gray-300 text-gray-500"
+                      ? "bg-amber-400 text-white"
+                      : "bg-gray-300 text-gray-500"
                   }`}
                 >
                   {isCompleted ? "✓" : isCurrent ? "•" : ""}

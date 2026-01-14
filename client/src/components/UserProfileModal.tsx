@@ -85,17 +85,25 @@ export default function UserProfileModal({
   const updateProfileMutation = useMutation({
     mutationFn: async (data: any) => {
       console.log("Sending profile update with:", {
-        resume: data.resume ? `${String(data.resume).substring(0, 50)}...` : "undefined",
-        coverLetter: data.coverLetter ? `${String(data.coverLetter).substring(0, 50)}...` : "undefined",
+        resume: data.resume
+          ? `${String(data.resume).substring(0, 50)}...`
+          : "undefined",
+        coverLetter: data.coverLetter
+          ? `${String(data.coverLetter).substring(0, 50)}...`
+          : "undefined",
       });
       return await apiRequest("/api/auth/profile", "PUT", data);
     },
     onSuccess: async (response) => {
       console.log("Profile update response:", {
-        resume: response.user.resume ? `${String(response.user.resume).substring(0, 50)}...` : "undefined",
-        coverLetter: response.user.coverLetter ? `${String(response.user.coverLetter).substring(0, 50)}...` : "undefined",
+        resume: response.user.resume
+          ? `${String(response.user.resume).substring(0, 50)}...`
+          : "undefined",
+        coverLetter: response.user.coverLetter
+          ? `${String(response.user.coverLetter).substring(0, 50)}...`
+          : "undefined",
       });
-      
+
       await refreshUser();
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       queryClient.invalidateQueries({
@@ -261,7 +269,9 @@ export default function UserProfileModal({
     }
   };
 
-  const handleCoverLetterFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCoverLetterFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = e.target.files?.[0];
     if (file) {
       const maxSize = 2 * 1024 * 1024;
@@ -395,9 +405,12 @@ export default function UserProfileModal({
           {user?.role === "jobseeker" && (
             <>
               <div className="border-t pt-4 mt-4">
-                <h3 className="text-lg font-semibold mb-3">Application Documents</h3>
+                <h3 className="text-lg font-semibold mb-3">
+                  Application Documents
+                </h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  Upload your resume and cover letter to auto-attach them when applying for jobs
+                  Upload your resume and cover letter to auto-attach them when
+                  applying for jobs
                 </p>
               </div>
 
@@ -413,7 +426,9 @@ export default function UserProfileModal({
                     >
                       Upload Resume
                     </label>
-                    <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX, TXT (Max 5MB)</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      PDF, DOC, DOCX, TXT (Max 5MB)
+                    </p>
                     <input
                       id="resumeUpload"
                       type="file"
@@ -455,7 +470,9 @@ export default function UserProfileModal({
                     >
                       Upload Cover Letter
                     </label>
-                    <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX, TXT (Max 2MB)</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      PDF, DOC, DOCX, TXT (Max 2MB)
+                    </p>
                     <input
                       id="coverLetterUpload"
                       type="file"

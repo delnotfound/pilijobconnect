@@ -35,7 +35,9 @@ export function useAuth() {
         const response = await apiRequest("/api/auth/me", "GET");
         setUser(response.user);
         setIsAuthenticated(true);
-        setCanPostJobs(response.user.role === "employer" || response.user.role === "admin");
+        setCanPostJobs(
+          response.user.role === "employer" || response.user.role === "admin"
+        );
       } catch {
         setIsAuthenticated(false);
         setUser(null);
@@ -56,7 +58,9 @@ export function useAuth() {
       });
       setUser(response.user);
       setIsAuthenticated(true);
-      setCanPostJobs(response.user.role === "employer" || response.user.role === "admin");
+      setCanPostJobs(
+        response.user.role === "employer" || response.user.role === "admin"
+      );
       setIsLoading(false);
       return { success: true };
     } catch (error: any) {
@@ -77,7 +81,9 @@ export function useAuth() {
       const response = await apiRequest("/api/auth/register", "POST", userData);
       setUser(response.user);
       setIsAuthenticated(true);
-      setCanPostJobs(response.user.role === "employer" || response.user.role === "admin");
+      setCanPostJobs(
+        response.user.role === "employer" || response.user.role === "admin"
+      );
       setIsLoading(false);
       return { success: true };
     } catch (error: any) {
@@ -96,7 +102,7 @@ export function useAuth() {
       setIsAuthenticated(false);
       setCanPostJobs(false);
       setIsLoading(false);
-      
+
       // Force page reload to ensure clean state
       window.location.reload();
     }
@@ -106,12 +112,18 @@ export function useAuth() {
     try {
       const response = await apiRequest("/api/auth/me", "GET");
       console.log("refreshUser response:", {
-        resume: response.user.resume ? `${String(response.user.resume).substring(0, 50)}...` : "undefined",
-        coverLetter: response.user.coverLetter ? `${String(response.user.coverLetter).substring(0, 50)}...` : "undefined",
+        resume: response.user.resume
+          ? `${String(response.user.resume).substring(0, 50)}...`
+          : "undefined",
+        coverLetter: response.user.coverLetter
+          ? `${String(response.user.coverLetter).substring(0, 50)}...`
+          : "undefined",
       });
       setUser(response.user);
       setIsAuthenticated(true);
-      setCanPostJobs(response.user.role === "employer" || response.user.role === "admin");
+      setCanPostJobs(
+        response.user.role === "employer" || response.user.role === "admin"
+      );
     } catch {
       setIsAuthenticated(false);
       setUser(null);

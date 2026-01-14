@@ -22,9 +22,11 @@ export default function JobSeekerDashboard({
   searchQuery,
   setSearchQuery,
   locationFilter,
-  setLocationFilter
+  setLocationFilter,
 }: JobSeekerDashboardProps) {
-  const [activeView, setActiveView] = useState<"browse" | "applications">("browse");
+  const [activeView, setActiveView] = useState<"browse" | "applications">(
+    "browse"
+  );
   const { user } = useAuth();
   const [showProfileModal, setShowProfileModal] = useState(false); // State to control modal visibility
 
@@ -36,7 +38,11 @@ export default function JobSeekerDashboard({
   };
 
   // Check if user profile is incomplete
-  const isProfileIncomplete = !user?.skills || !user?.desiredRoles || !user?.experienceLevel || !user?.preferredLocation;
+  const isProfileIncomplete =
+    !user?.skills ||
+    !user?.desiredRoles ||
+    !user?.experienceLevel ||
+    !user?.preferredLocation;
 
   if (activeView === "applications") {
     return (
@@ -45,8 +51,12 @@ export default function JobSeekerDashboard({
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center">
               <div>
-                <h1 className="text-3xl font-bold mb-2">Welcome back, {getUserDisplayName()}!</h1>
-                <p className="text-primary-foreground/80">Track your job applications and find new opportunities</p>
+                <h1 className="text-3xl font-bold mb-2">
+                  Welcome back, {getUserDisplayName()}!
+                </h1>
+                <p className="text-primary-foreground/80">
+                  Track your job applications and find new opportunities
+                </p>
               </div>
               <Button
                 variant="secondary"
@@ -68,8 +78,12 @@ export default function JobSeekerDashboard({
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Welcome back, {getUserDisplayName()}!</h1>
-          <p className="text-muted-foreground">Find your next opportunity in Pili, Camarines Sur</p>
+          <h1 className="text-3xl font-bold">
+            Welcome back, {getUserDisplayName()}!
+          </h1>
+          <p className="text-muted-foreground">
+            Find your next opportunity in Pili, Camarines Sur
+          </p>
         </div>
       </div>
 
@@ -86,7 +100,9 @@ export default function JobSeekerDashboard({
                   Complete your profile to see job match percentages
                 </h3>
                 <p className="text-sm text-blue-700 mb-3">
-                  Add your skills, desired roles, experience level, and preferred location to see how well each job matches your profile.
+                  Add your skills, desired roles, experience level, and
+                  preferred location to see how well each job matches your
+                  profile.
                 </p>
                 <Button
                   size="sm"
@@ -110,7 +126,9 @@ export default function JobSeekerDashboard({
         </TabsList>
 
         <TabsContent value="recommended">
-          <RecommendedJobs onOpenProfileModal={() => setShowProfileModal(true)} />
+          <RecommendedJobs
+            onOpenProfileModal={() => setShowProfileModal(true)}
+          />
         </TabsContent>
 
         <TabsContent value="browse">

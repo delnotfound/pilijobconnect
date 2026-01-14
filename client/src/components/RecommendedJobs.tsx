@@ -1,9 +1,15 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Briefcase, ThumbsUp, ThumbsDown, TrendingUp, FileText } from "lucide-react";
+import {
+  MapPin,
+  Briefcase,
+  ThumbsUp,
+  ThumbsDown,
+  TrendingUp,
+  FileText,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,7 +28,9 @@ interface RecommendedJobsProps {
   onOpenProfileModal?: () => void;
 }
 
-export default function RecommendedJobs({ onOpenProfileModal }: RecommendedJobsProps) {
+export default function RecommendedJobs({
+  onOpenProfileModal,
+}: RecommendedJobsProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -42,7 +50,9 @@ export default function RecommendedJobs({ onOpenProfileModal }: RecommendedJobsP
         title: "Feedback recorded",
         description: "Thank you for helping us improve recommendations!",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/jobseeker/recommendations"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/jobseeker/recommendations"],
+      });
     },
   });
 
@@ -52,7 +62,11 @@ export default function RecommendedJobs({ onOpenProfileModal }: RecommendedJobsP
     return "text-yellow-600 bg-yellow-100";
   };
 
-  const isProfileComplete = user?.skills && user?.desiredRoles && user?.experienceLevel && user?.preferredLocation;
+  const isProfileComplete =
+    user?.skills &&
+    user?.desiredRoles &&
+    user?.experienceLevel &&
+    user?.preferredLocation;
 
   if (isLoading) {
     return <div>Loading recommendations...</div>;
@@ -67,7 +81,8 @@ export default function RecommendedJobs({ onOpenProfileModal }: RecommendedJobsP
           </div>
           <h3 className="text-xl font-semibold mb-2">Complete Your Profile</h3>
           <p className="text-gray-600 mb-4">
-            To get personalized job recommendations, please complete your profile with:
+            To get personalized job recommendations, please complete your
+            profile with:
           </p>
           <ul className="text-left text-sm text-gray-600 mb-6 space-y-2">
             {!user?.skills && (
@@ -91,11 +106,7 @@ export default function RecommendedJobs({ onOpenProfileModal }: RecommendedJobsP
               </li>
             )}
           </ul>
-          <Button 
-            onClick={onOpenProfileModal}
-          >
-            Complete Profile Now
-          </Button>
+          <Button onClick={onOpenProfileModal}>Complete Profile Now</Button>
         </div>
       </Card>
     );
@@ -106,7 +117,8 @@ export default function RecommendedJobs({ onOpenProfileModal }: RecommendedJobsP
       <Card>
         <CardContent className="p-6 text-center">
           <p className="text-gray-500">
-            Complete your profile with skills and preferences to get personalized job recommendations!
+            Complete your profile with skills and preferences to get
+            personalized job recommendations!
           </p>
         </CardContent>
       </Card>
@@ -151,24 +163,36 @@ export default function RecommendedJobs({ onOpenProfileModal }: RecommendedJobsP
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Button onClick={() => {
-                    setSelectedJob(job);
-                    setIsApplicationModalOpen(true);
-                  }}>
+                  <Button
+                    onClick={() => {
+                      setSelectedJob(job);
+                      setIsApplicationModalOpen(true);
+                    }}
+                  >
                     Apply Now
                   </Button>
                   <div className="flex gap-1">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => feedbackMutation.mutate({ jobId: job.id, feedback: "thumbs_up" })}
+                      onClick={() =>
+                        feedbackMutation.mutate({
+                          jobId: job.id,
+                          feedback: "thumbs_up",
+                        })
+                      }
                     >
                       <ThumbsUp className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => feedbackMutation.mutate({ jobId: job.id, feedback: "thumbs_down" })}
+                      onClick={() =>
+                        feedbackMutation.mutate({
+                          jobId: job.id,
+                          feedback: "thumbs_down",
+                        })
+                      }
                     >
                       <ThumbsDown className="h-4 w-4" />
                     </Button>
