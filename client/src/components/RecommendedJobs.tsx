@@ -18,7 +18,11 @@ interface JobWithMatch extends Job {
   roleMatch: number;
 }
 
-export default function RecommendedJobs() {
+interface RecommendedJobsProps {
+  onOpenProfileModal?: () => void;
+}
+
+export default function RecommendedJobs({ onOpenProfileModal }: RecommendedJobsProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -88,10 +92,7 @@ export default function RecommendedJobs() {
             )}
           </ul>
           <Button 
-            onClick={() => {
-              const editButton = document.querySelector('[data-profile-edit]') as HTMLElement;
-              if (editButton) editButton.click();
-            }}
+            onClick={onOpenProfileModal}
           >
             Complete Profile Now
           </Button>

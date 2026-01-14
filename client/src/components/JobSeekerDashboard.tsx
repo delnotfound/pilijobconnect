@@ -110,7 +110,7 @@ export default function JobSeekerDashboard({
         </TabsList>
 
         <TabsContent value="recommended">
-          <RecommendedJobs />
+          <RecommendedJobs onOpenProfileModal={() => setShowProfileModal(true)} />
         </TabsContent>
 
         <TabsContent value="browse">

@@ -1,4 +1,15 @@
-import { pgTable, text, integer, serial, boolean, timestamp, real, uniqueIndex, varchar, json } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  integer,
+  serial,
+  boolean,
+  timestamp,
+  real,
+  uniqueIndex,
+  varchar,
+  json,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -14,13 +25,17 @@ export const users = pgTable("users", {
   phone: varchar("phone", { length: 20 }),
   address: text("address"),
   profileImage: text("profile_image"),
+  resume: text("resume"),
+  coverLetter: text("cover_letter"),
   skills: text("skills"),
   desiredRoles: text("desired_roles"),
   experienceLevel: varchar("experience_level", { length: 50 }),
   preferredLocation: varchar("preferred_location", { length: 255 }),
   isActive: boolean("is_active").notNull().default(true),
   isVerified: boolean("is_verified").default(false),
-  verificationStatus: varchar("verification_status", { length: 50 }).default("pending"),
+  verificationStatus: varchar("verification_status", { length: 50 }).default(
+    "pending"
+  ),
   barangayPermit: text("barangay_permit"),
   businessPermit: text("business_permit"),
   lastLoginAt: timestamp("last_login_at"),
@@ -30,7 +45,9 @@ export const users = pgTable("users", {
 
 export const userSessions = pgTable("user_sessions", {
   id: varchar("id", { length: 255 }).primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
@@ -67,7 +84,9 @@ export const jobs = pgTable("jobs", {
 
 export const applications = pgTable("applications", {
   id: serial("id").primaryKey(),
-  jobId: integer("job_id").notNull().references(() => jobs.id, { onDelete: "cascade" }),
+  jobId: integer("job_id")
+    .notNull()
+    .references(() => jobs.id, { onDelete: "cascade" }),
   applicantId: integer("applicant_id").references(() => users.id),
   firstName: varchar("first_name", { length: 100 }).notNull(),
   middleName: varchar("middle_name", { length: 100 }),
@@ -88,7 +107,9 @@ export const applications = pgTable("applications", {
   interviewType: varchar("interview_type", { length: 20 }),
   interviewNotes: text("interview_notes"),
   notProceedingReason: text("not_proceeding_reason"),
-  smsNotificationSent: boolean("sms_notification_sent").notNull().default(false),
+  smsNotificationSent: boolean("sms_notification_sent")
+    .notNull()
+    .default(false),
   appliedAt: timestamp("applied_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -117,32 +138,56 @@ export const categories = pgTable("categories", {
   jobCount: integer("job_count").notNull().default(0),
 });
 
-export const jobMatches = pgTable("job_matches", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  jobId: integer("job_id").notNull().references(() => jobs.id, { onDelete: "cascade" }),
-  matchScore: real("match_score").notNull(),
-  skillMatch: real("skill_match").notNull().default(0),
-  locationMatch: real("location_match").notNull().default(0),
-  roleMatch: real("role_match").notNull().default(0),
-  userFeedback: varchar("user_feedback", { length: 20 }),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-}, (table) => ({
-  uniqueJobMatch: uniqueIndex("unique_job_match").on(table.userId, table.jobId),
-}));
+export const jobMatches = pgTable(
+  "job_matches",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    jobId: integer("job_id")
+      .notNull()
+      .references(() => jobs.id, { onDelete: "cascade" }),
+    matchScore: real("match_score").notNull(),
+    skillMatch: real("skill_match").notNull().default(0),
+    locationMatch: real("location_match").notNull().default(0),
+    roleMatch: real("role_match").notNull().default(0),
+    userFeedback: varchar("user_feedback", { length: 20 }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    uniqueJobMatch: uniqueIndex("unique_job_match").on(
+      table.userId,
+      table.jobId
+    ),
+  })
+);
 
-export const savedJobs = pgTable("saved_jobs", {
-  id: serial("id").primaryKey(),
-  jobId: integer("job_id").notNull().references(() => jobs.id, { onDelete: "cascade" }),
-  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  savedAt: timestamp("saved_at").notNull().defaultNow(),
-}, (table) => ({
-  uniqueSavedJob: uniqueIndex("unique_saved_job").on(table.jobId, table.userId),
-}));
+export const savedJobs = pgTable(
+  "saved_jobs",
+  {
+    id: serial("id").primaryKey(),
+    jobId: integer("job_id")
+      .notNull()
+      .references(() => jobs.id, { onDelete: "cascade" }),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    savedAt: timestamp("saved_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    uniqueSavedJob: uniqueIndex("unique_saved_job").on(
+      table.jobId,
+      table.userId
+    ),
+  })
+);
 
 export const jobAlerts = pgTable("job_alerts", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   keywords: text("keywords"),
   location: varchar("location", { length: 255 }),
   category: varchar("category", { length: 100 }),
@@ -234,24 +279,42 @@ export const insertApplicationSchema = createInsertSchema(applications).omit({
   status: true,
 });
 
-export const updateApplicationSchema = insertApplicationSchema.partial().extend({
-  status: z.enum(["applied", "reviewed", "additional_docs_required", "interview_scheduled", "interview_completed", "hired", "not_proceeding"]).optional(),
-  notes: z.string().optional(),
-  requiredDocuments: z.string().optional().nullable(),
-  submittedDocuments: z.string().optional().nullable(),
-  interviewDate: z.union([z.date(), z.string()]).transform(val => 
-    typeof val === 'string' ? new Date(val) : val
-  ).optional().nullable(),
-  interviewTime: z.string().optional().nullable(),
-  interviewVenue: z.string().optional().nullable(),
-  interviewType: z.enum(["phone", "video", "in-person"]).optional().nullable(),
-  interviewNotes: z.string().optional().nullable(),
-  notProceedingReason: z.string().optional().nullable(),
-  smsNotificationSent: z.boolean().optional(),
-  updatedAt: z.union([z.date(), z.string()]).transform(val => 
-    typeof val === 'string' ? new Date(val) : val
-  ).optional(),
-});
+export const updateApplicationSchema = insertApplicationSchema
+  .partial()
+  .extend({
+    status: z
+      .enum([
+        "applied",
+        "reviewed",
+        "additional_docs_required",
+        "interview_scheduled",
+        "interview_completed",
+        "hired",
+        "not_proceeding",
+      ])
+      .optional(),
+    notes: z.string().optional(),
+    requiredDocuments: z.string().optional().nullable(),
+    submittedDocuments: z.string().optional().nullable(),
+    interviewDate: z
+      .union([z.date(), z.string()])
+      .transform((val) => (typeof val === "string" ? new Date(val) : val))
+      .optional()
+      .nullable(),
+    interviewTime: z.string().optional().nullable(),
+    interviewVenue: z.string().optional().nullable(),
+    interviewType: z
+      .enum(["phone", "video", "in-person"])
+      .optional()
+      .nullable(),
+    interviewNotes: z.string().optional().nullable(),
+    notProceedingReason: z.string().optional().nullable(),
+    smsNotificationSent: z.boolean().optional(),
+    updatedAt: z
+      .union([z.date(), z.string()])
+      .transform((val) => (typeof val === "string" ? new Date(val) : val))
+      .optional(),
+  });
 
 export const insertEmployerSchema = createInsertSchema(employers).omit({
   id: true,

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Card,
@@ -16,10 +15,8 @@ import {
   Clock,
   FileText,
   Download,
-  AlertCircle,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import AdditionalDocsModal from "./AdditionalDocsModal";
 import { ApplicationProgressTracker } from "./ApplicationProgressTracker";
 
 interface Application {
@@ -46,29 +43,11 @@ interface Application {
 
 export function JobSeekerApplications() {
   const { user } = useAuth();
-  const [showDocsModal, setShowDocsModal] = useState(false);
-  const [selectedApp, setSelectedApp] = useState<Application | null>(null);
-  const [requiredDocs, setRequiredDocs] = useState<string[]>([]);
 
   const { data: applications = [], isLoading } = useQuery<Application[]>({
     queryKey: ["/api/jobseeker/applications"],
     enabled: !!user && user.role === "jobseeker",
   });
-
-  const handleSubmitDocs = (application: Application) => {
-    setSelectedApp(application);
-    // Parse required documents if available
-    if (application.requiredDocuments) {
-      try {
-        setRequiredDocs(JSON.parse(application.requiredDocuments));
-      } catch {
-        setRequiredDocs(["Valid_ID", "NBI_Clearance"]);
-      }
-    } else {
-      setRequiredDocs(["Valid_ID", "NBI_Clearance"]);
-    }
-    setShowDocsModal(true);
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -78,7 +57,7 @@ export function JobSeekerApplications() {
       case "reviewed":
         return "bg-blue-100 text-blue-800";
       case "additional_docs_required":
-        return "bg-amber-100 text-amber-800";
+        return "bg-blue-100 text-blue-800";
       case "interview_scheduled":
         return "bg-purple-100 text-purple-800";
       case "interview_completed":
@@ -102,7 +81,7 @@ export function JobSeekerApplications() {
       case "reviewed":
         return "Reviewed";
       case "additional_docs_required":
-        return "Additional Documents Required";
+        return "Reviewed";
       case "interview_scheduled":
         return "Interview Scheduled";
       case "interview_completed":
@@ -205,19 +184,6 @@ export function JobSeekerApplications() {
                   <ApplicationProgressTracker status={application.status} />
                 </div>
 
-                {application.status === "additional_docs_required" && (
-                  <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md flex items-start gap-2">
-                    <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1">
-                      <p className="font-medium text-amber-900 text-sm">
-                        Action Required
-                      </p>
-                      <p className="text-amber-800 text-sm">
-                        The employer requires additional documents to proceed with your application. Please upload the required documents to move forward.
-                      </p>
-                    </div>
-                  </div>
-                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">
@@ -270,17 +236,6 @@ export function JobSeekerApplications() {
                         Cover Letter
                       </Button>
                     )}
-                    {application.status === "additional_docs_required" && (
-                      <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => handleSubmitDocs(application)}
-                        className="bg-amber-600 hover:bg-amber-700"
-                      >
-                        <FileText className="mr-1 h-3 w-3" />
-                        Submit Docs
-                      </Button>
-                    )}
                   </div>
                 </div>
                 {application.coverLetter &&
@@ -297,18 +252,6 @@ export function JobSeekerApplications() {
           ))}
         </div>
       )}
-
-      {/* Additional Docs Modal */}
-      <AdditionalDocsModal
-        isOpen={showDocsModal}
-        onClose={() => {
-          setShowDocsModal(false);
-          setSelectedApp(null);
-          setRequiredDocs([]);
-        }}
-        applicationId={selectedApp?.id || 0}
-        requiredDocuments={requiredDocs}
-      />
     </div>
   );
 }

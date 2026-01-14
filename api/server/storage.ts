@@ -525,16 +525,55 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getJobsByEmployer(employerId: number): Promise<Job[]> {
-    return await db
+    console.log(
+      "Storage.getJobsByEmployer called with employerId:",
+      employerId
+    );
+
+    // First, let's get all jobs to see what's in the database
+    const allJobs = await db.select().from(jobs);
+    console.log("Total jobs in database:", allJobs.length);
+    console.log(
+      "All jobs employerIds:",
+      allJobs.map((j: any) => ({
+        id: j.id,
+        employerId: j.employerId,
+        title: j.title,
+      }))
+    );
+
+    const result = await db
       .select()
       .from(jobs)
       .where(eq(jobs.employerId, employerId))
       .orderBy(desc(jobs.postedAt));
+
+    console.log(`Jobs found for employerId ${employerId}:`, result.length);
+    return result;
   }
 
   async getApplicationsByEmployer(
     employerId: number
   ): Promise<Array<Application & { jobTitle: string }>> {
+    console.log(
+      "Storage.getApplicationsByEmployer called with employerId:",
+      employerId
+    );
+
+    // First get all jobs for this employer to understand the structure
+    const employerJobs = await db
+      .select()
+      .from(jobs)
+      .where(eq(jobs.employerId, employerId));
+    console.log(
+      `Found ${employerJobs.length} jobs for employer ${employerId}:`,
+      employerJobs.map((j: any) => j.id)
+    );
+
+    // Get all applications to see the structure
+    const allApps = await db.select().from(applications);
+    console.log("Total applications in database:", allApps.length);
+
     const applicationsWithJobTitles = await db
       .select({
         id: applications.id,
@@ -569,6 +608,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(jobs.employerId, employerId))
       .orderBy(desc(applications.appliedAt));
 
+    console.log(
+      `Applications found for employer ${employerId}:`,
+      applicationsWithJobTitles.length
+    );
     return applicationsWithJobTitles;
   }
 

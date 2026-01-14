@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Card,
@@ -101,7 +101,8 @@ export function EmployerDashboard() {
 
   // Status update modal state
   const [showStatusModal, setShowStatusModal] = useState(false);
-  const [statusModalApplication, setStatusModalApplication] = useState<any>(null);
+  const [statusModalApplication, setStatusModalApplication] =
+    useState<any>(null);
 
   const [newJob, setNewJob] = useState({
     title: "",
@@ -117,12 +118,20 @@ export function EmployerDashboard() {
   });
 
   // Fetch employer's jobs
-  const { data: employerJobs = [] } = useQuery<any[]>({
+  const {
+    data: employerJobs = [],
+    isLoading: jobsLoading,
+    error: jobsError,
+  } = useQuery<any[]>({
     queryKey: ["/api/employer/jobs"],
   });
 
   // Fetch applications for employer's jobs
-  const { data: applications = [] } = useQuery<any[]>({
+  const {
+    data: applications = [],
+    isLoading: appsLoading,
+    error: appsError,
+  } = useQuery<any[]>({
     queryKey: ["/api/employer/applications"],
   });
 
@@ -130,6 +139,25 @@ export function EmployerDashboard() {
   const { data: categories = [] } = useQuery<any[]>({
     queryKey: ["/api/categories"],
   });
+
+  // Debug logging
+  useEffect(() => {
+    console.log("EmployerDashboard - Data fetch status:", {
+      jobsLoading,
+      jobsCount: employerJobs.length,
+      jobsError: jobsError ? jobsError.message : null,
+      appsLoading,
+      appsCount: applications.length,
+      appsError: appsError ? appsError.message : null,
+    });
+  }, [
+    employerJobs,
+    applications,
+    jobsLoading,
+    appsLoading,
+    jobsError,
+    appsError,
+  ]);
 
   const postJobMutation = useMutation({
     mutationFn: (jobData: any) => apiRequest("/api/jobs", "POST", jobData),
@@ -215,17 +243,17 @@ export function EmployerDashboard() {
   });
 
   const updateApplicationMutation = useMutation({
-    mutationFn: ({ 
-      id, 
-      status, 
+    mutationFn: ({
+      id,
+      status,
       interviewDate,
       interviewTime,
       interviewVenue,
       interviewType,
       interviewNotes,
-      notProceedingReason 
-    }: { 
-      id: number; 
+      notProceedingReason,
+    }: {
+      id: number;
       status: string;
       interviewDate?: string;
       interviewTime?: string;
@@ -234,14 +262,14 @@ export function EmployerDashboard() {
       interviewNotes?: string;
       notProceedingReason?: string;
     }) =>
-      apiRequest(`/api/applications/${id}`, "PATCH", { 
+      apiRequest(`/api/applications/${id}`, "PATCH", {
         status,
         interviewDate,
         interviewTime,
         interviewVenue,
         interviewType,
         interviewNotes,
-        notProceedingReason
+        notProceedingReason,
       }),
     onSuccess: (_, variables) => {
       let message = "Application status updated!";
@@ -250,7 +278,8 @@ export function EmployerDashboard() {
       } else if (variables.status === "interview_completed") {
         message = "Interview marked as completed! Applicant notified.";
       } else if (variables.status === "not_proceeding") {
-        message = "Application marked as not proceeding. Applicant notified with reason.";
+        message =
+          "Application marked as not proceeding. Applicant notified with reason.";
       } else if (variables.status === "hired") {
         message = "Congratulations! Applicant has been hired and notified.";
       }
@@ -463,7 +492,7 @@ export function EmployerDashboard() {
       case "reviewed":
         return "default";
       case "additional_docs_required":
-        return "outline";
+        return "default";
       case "interview_scheduled":
         return "outline";
       case "interview_completed":
@@ -487,7 +516,7 @@ export function EmployerDashboard() {
       case "reviewed":
         return "Reviewed";
       case "additional_docs_required":
-        return "Additional Docs Required";
+        return "Reviewed";
       case "interview_scheduled":
         return "Interview Scheduled";
       case "interview_completed":
@@ -516,7 +545,12 @@ export function EmployerDashboard() {
   const submitInterviewSchedule = () => {
     if (!selectedApplication) return;
 
-    if (!interviewData.date || !interviewData.time || !interviewData.venue || !interviewData.type) {
+    if (
+      !interviewData.date ||
+      !interviewData.time ||
+      !interviewData.venue ||
+      !interviewData.type
+    ) {
       toast({
         title: "Error",
         description: "Please fill in all required interview details",
@@ -1054,56 +1088,73 @@ export function EmployerDashboard() {
                       </div>
 
                       {/* Show interview details if scheduled */}
-                      {app.status === "interview_scheduled" && app.interviewDate && (
-                        <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950 rounded-md">
-                          <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">
-                            Interview Details
-                          </p>
-                          <div className="grid grid-cols-2 gap-2 text-sm">
-                            <div className="flex items-center gap-1 text-blue-700 dark:text-blue-300">
-                              <Calendar className="h-3 w-3" />
-                              {new Date(app.interviewDate).toLocaleDateString()}
-                            </div>
-                            <div className="flex items-center gap-1 text-blue-700 dark:text-blue-300">
-                              <Clock className="h-3 w-3" />
-                              {app.interviewTime && app.interviewTime.includes(':') ? (() => {
-                                const parts = app.interviewTime.split(':');
-                                if (parts.length < 2) return app.interviewTime;
-                                const hour = parseInt(parts[0], 10);
-                                const minutes = parts[1].padStart(2, '0');
-                                if (isNaN(hour)) return app.interviewTime;
-                                const ampm = hour >= 12 ? 'PM' : 'AM';
-                                const displayHour = hour % 12 || 12;
-                                return `${displayHour.toString().padStart(2, '0')}:${minutes} ${ampm}`;
-                              })() : (app.interviewTime || 'TBD')}
-                            </div>
-                            <div className="flex items-center gap-1 text-blue-700 dark:text-blue-300">
-                              {app.interviewType === "phone" && <Phone className="h-3 w-3" />}
-                              {app.interviewType === "video" && <Video className="h-3 w-3" />}
-                              {app.interviewType === "in-person" && <Building className="h-3 w-3" />}
-                              {app.interviewType}
-                            </div>
-                            <div className="flex items-center gap-1 text-blue-700 dark:text-blue-300">
-                              <MapPin className="h-3 w-3" />
-                              {app.interviewVenue}
-                            </div>
-                          </div>
-                          {app.interviewNotes && (
-                            <p className="mt-2 text-xs text-blue-600 dark:text-blue-400">
-                              Notes: {app.interviewNotes}
+                      {app.status === "interview_scheduled" &&
+                        app.interviewDate && (
+                          <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950 rounded-md">
+                            <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">
+                              Interview Details
                             </p>
-                          )}
-                        </div>
-                      )}
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div className="flex items-center gap-1 text-blue-700 dark:text-blue-300">
+                                <Calendar className="h-3 w-3" />
+                                {new Date(
+                                  app.interviewDate
+                                ).toLocaleDateString()}
+                              </div>
+                              <div className="flex items-center gap-1 text-blue-700 dark:text-blue-300">
+                                <Clock className="h-3 w-3" />
+                                {app.interviewTime &&
+                                app.interviewTime.includes(":")
+                                  ? (() => {
+                                      const parts =
+                                        app.interviewTime.split(":");
+                                      if (parts.length < 2)
+                                        return app.interviewTime;
+                                      const hour = parseInt(parts[0], 10);
+                                      const minutes = parts[1].padStart(2, "0");
+                                      if (isNaN(hour)) return app.interviewTime;
+                                      const ampm = hour >= 12 ? "PM" : "AM";
+                                      const displayHour = hour % 12 || 12;
+                                      return `${displayHour
+                                        .toString()
+                                        .padStart(2, "0")}:${minutes} ${ampm}`;
+                                    })()
+                                  : app.interviewTime || "TBD"}
+                              </div>
+                              <div className="flex items-center gap-1 text-blue-700 dark:text-blue-300">
+                                {app.interviewType === "phone" && (
+                                  <Phone className="h-3 w-3" />
+                                )}
+                                {app.interviewType === "video" && (
+                                  <Video className="h-3 w-3" />
+                                )}
+                                {app.interviewType === "in-person" && (
+                                  <Building className="h-3 w-3" />
+                                )}
+                                {app.interviewType}
+                              </div>
+                              <div className="flex items-center gap-1 text-blue-700 dark:text-blue-300">
+                                <MapPin className="h-3 w-3" />
+                                {app.interviewVenue}
+                              </div>
+                            </div>
+                            {app.interviewNotes && (
+                              <p className="mt-2 text-xs text-blue-600 dark:text-blue-400">
+                                Notes: {app.interviewNotes}
+                              </p>
+                            )}
+                          </div>
+                        )}
 
                       {/* Show not proceeding reason if applicable */}
-                      {app.status === "not_proceeding" && app.notProceedingReason && (
-                        <div className="mt-3 p-3 bg-red-50 dark:bg-red-950 rounded-md">
-                          <p className="text-sm font-medium text-red-800 dark:text-red-200">
-                            Reason: {app.notProceedingReason}
-                          </p>
-                        </div>
-                      )}
+                      {app.status === "not_proceeding" &&
+                        app.notProceedingReason && (
+                          <div className="mt-3 p-3 bg-red-50 dark:bg-red-950 rounded-md">
+                            <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                              Reason: {app.notProceedingReason}
+                            </p>
+                          </div>
+                        )}
 
                       {app.coverLetter && (
                         <div className="mt-3">
@@ -1126,34 +1177,18 @@ export function EmployerDashboard() {
                             </Button>
                           ) : (
                             <div className="text-sm text-muted-foreground mt-1 max-h-24 overflow-y-auto p-2 bg-gray-50 rounded border break-words whitespace-pre-wrap">
-                              {app.coverLetter?.substring(0, 500) || "No cover letter provided"}
-                              {app.coverLetter && app.coverLetter.length > 500 && (
-                                <span className="text-primary">... (view full text below)</span>
-                              )}
+                              {app.coverLetter?.substring(0, 500) ||
+                                "No cover letter provided"}
+                              {app.coverLetter &&
+                                app.coverLetter.length > 500 && (
+                                  <span className="text-primary">
+                                    ... (view full text below)
+                                  </span>
+                                )}
                             </div>
                           )}
                         </div>
                       )}
-                      {app.resume && (
-                        <div className="mt-3">
-                          <p className="text-sm font-medium">Resume:</p>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() =>
-                              window.open(
-                                `/api/download/resume/${app.id}`,
-                                "_blank"
-                              )
-                            }
-                            className="mt-1"
-                          >
-                            <Download className="h-3 w-3 mr-1" />
-                            Download Resume
-                          </Button>
-                        </div>
-                      )}
-
                       {/* Submitted Documents Section */}
                       {app.submittedDocuments && (
                         <div className="mt-3">
@@ -1163,30 +1198,38 @@ export function EmployerDashboard() {
                           <div className="mt-2 space-y-2">
                             {(() => {
                               try {
-                                const docs = typeof app.submittedDocuments === 'string' 
-                                  ? JSON.parse(app.submittedDocuments) 
-                                  : app.submittedDocuments;
-                                
-                                return Object.entries(docs).map(([docType, dataUrl]: [string, any]) => {
-                                  const displayName = docType
-                                    .replace(/_/g, ' ')
-                                    .replace(/\b\w/g, (char: string) => char.toUpperCase());
-                                  
-                                  return (
-                                    <Button
-                                      key={docType}
-                                      size="sm"
-                                      variant="default"
-                                      className="w-full justify-start bg-green-600 hover:bg-green-700"
-                                      onClick={() => {
-                                        downloadBase64File(dataUrl, displayName);
-                                      }}
-                                    >
-                                      <Download className="h-3 w-3 mr-2" />
-                                      {displayName}
-                                    </Button>
-                                  );
-                                });
+                                const docs =
+                                  typeof app.submittedDocuments === "string"
+                                    ? JSON.parse(app.submittedDocuments)
+                                    : app.submittedDocuments;
+
+                                return Object.entries(docs).map(
+                                  ([docType, dataUrl]: [string, any]) => {
+                                    const displayName = docType
+                                      .replace(/_/g, " ")
+                                      .replace(/\b\w/g, (char: string) =>
+                                        char.toUpperCase()
+                                      );
+
+                                    return (
+                                      <Button
+                                        key={docType}
+                                        size="sm"
+                                        variant="default"
+                                        className="w-full justify-start bg-green-600 hover:bg-green-700"
+                                        onClick={() => {
+                                          downloadBase64File(
+                                            dataUrl,
+                                            displayName
+                                          );
+                                        }}
+                                      >
+                                        <Download className="h-3 w-3 mr-2" />
+                                        {displayName}
+                                      </Button>
+                                    );
+                                  }
+                                );
                               } catch (error) {
                                 return (
                                   <p className="text-xs text-red-500">
@@ -1203,25 +1246,31 @@ export function EmployerDashboard() {
                     {/* Action Button - Open Status Update Modal */}
                     <div className="flex flex-col space-y-2 ml-4 min-w-[140px]">
                       {/* Show action button for all non-completed statuses */}
-                      {app.status !== "hired" && app.status !== "not_proceeding" && (
-                        <Button
-                          size="sm"
-                          variant="default"
-                          onClick={() => {
-                            setStatusModalApplication(app);
-                            setShowStatusModal(true);
-                          }}
-                          disabled={updateApplicationMutation.isPending}
-                          className="bg-blue-600 hover:bg-blue-700"
-                        >
-                          Update Status
-                        </Button>
-                      )}
+                      {(app.status?.toLowerCase() || "") !== "hired" &&
+                        (app.status?.toLowerCase() || "") !==
+                          "not_proceeding" && (
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={() => {
+                              setStatusModalApplication(app);
+                              setShowStatusModal(true);
+                            }}
+                            disabled={updateApplicationMutation.isPending}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            Update Status
+                          </Button>
+                        )}
 
                       {/* Show status for completed applications */}
-                      {(app.status === "hired" || app.status === "not_proceeding") && (
+                      {((app.status?.toLowerCase() || "") === "hired" ||
+                        (app.status?.toLowerCase() || "") ===
+                          "not_proceeding") && (
                         <div className="text-sm text-muted-foreground text-center">
-                          {app.status === "hired" ? "Successfully Hired" : "Application Closed"}
+                          {(app.status?.toLowerCase() || "") === "hired"
+                            ? "Successfully Hired"
+                            : "Application Closed"}
                         </div>
                       )}
                     </div>
@@ -1272,8 +1321,12 @@ export function EmployerDashboard() {
           {selectedApplication && (
             <div className="space-y-4">
               <div className="p-3 bg-muted rounded-md">
-                <p className="font-medium">{selectedApplication.firstName} {selectedApplication.lastName}</p>
-                <p className="text-sm text-muted-foreground">Applying for: {selectedApplication.jobTitle}</p>
+                <p className="font-medium">
+                  {selectedApplication.firstName} {selectedApplication.lastName}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Applying for: {selectedApplication.jobTitle}
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -1283,8 +1336,13 @@ export function EmployerDashboard() {
                     id="interview-date"
                     type="date"
                     value={interviewData.date}
-                    onChange={(e) => setInterviewData(prev => ({ ...prev, date: e.target.value }))}
-                    min={new Date().toISOString().split('T')[0]}
+                    onChange={(e) =>
+                      setInterviewData((prev) => ({
+                        ...prev,
+                        date: e.target.value,
+                      }))
+                    }
+                    min={new Date().toISOString().split("T")[0]}
                     data-testid="input-interview-date"
                   />
                 </div>
@@ -1294,7 +1352,12 @@ export function EmployerDashboard() {
                     id="interview-time"
                     type="time"
                     value={interviewData.time}
-                    onChange={(e) => setInterviewData(prev => ({ ...prev, time: e.target.value }))}
+                    onChange={(e) =>
+                      setInterviewData((prev) => ({
+                        ...prev,
+                        time: e.target.value,
+                      }))
+                    }
                     data-testid="input-interview-time"
                   />
                 </div>
@@ -1304,9 +1367,17 @@ export function EmployerDashboard() {
                 <Label htmlFor="interview-type">Interview Type *</Label>
                 <Select
                   value={interviewData.type}
-                  onValueChange={(value) => setInterviewData(prev => ({ ...prev, type: value as any }))}
+                  onValueChange={(value) =>
+                    setInterviewData((prev) => ({
+                      ...prev,
+                      type: value as any,
+                    }))
+                  }
                 >
-                  <SelectTrigger id="interview-type" data-testid="select-interview-type">
+                  <SelectTrigger
+                    id="interview-type"
+                    data-testid="select-interview-type"
+                  >
                     <SelectValue placeholder="Select interview type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1337,18 +1408,36 @@ export function EmployerDashboard() {
                 <Input
                   id="interview-venue"
                   value={interviewData.venue}
-                  onChange={(e) => setInterviewData(prev => ({ ...prev, venue: e.target.value }))}
-                  placeholder={interviewData.type === "video" ? "Zoom/Meet link" : interviewData.type === "phone" ? "Phone number to call" : "Office address"}
+                  onChange={(e) =>
+                    setInterviewData((prev) => ({
+                      ...prev,
+                      venue: e.target.value,
+                    }))
+                  }
+                  placeholder={
+                    interviewData.type === "video"
+                      ? "Zoom/Meet link"
+                      : interviewData.type === "phone"
+                      ? "Phone number to call"
+                      : "Office address"
+                  }
                   data-testid="input-interview-venue"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="interview-notes">Additional Notes (Optional)</Label>
+                <Label htmlFor="interview-notes">
+                  Additional Notes (Optional)
+                </Label>
                 <Textarea
                   id="interview-notes"
                   value={interviewData.notes}
-                  onChange={(e) => setInterviewData(prev => ({ ...prev, notes: e.target.value }))}
+                  onChange={(e) =>
+                    setInterviewData((prev) => ({
+                      ...prev,
+                      notes: e.target.value,
+                    }))
+                  }
                   placeholder="Any special instructions for the candidate..."
                   rows={3}
                   data-testid="input-interview-notes"
@@ -1356,23 +1445,31 @@ export function EmployerDashboard() {
               </div>
 
               <div className="flex justify-end space-x-2 pt-4">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => {
                     setShowInterviewModal(false);
                     setSelectedApplication(null);
-                    setInterviewData({ date: "", time: "", venue: "", type: "", notes: "" });
+                    setInterviewData({
+                      date: "",
+                      time: "",
+                      venue: "",
+                      type: "",
+                      notes: "",
+                    });
                   }}
                   data-testid="button-cancel-interview"
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   onClick={submitInterviewSchedule}
                   disabled={updateApplicationMutation.isPending}
                   data-testid="button-submit-interview"
                 >
-                  {updateApplicationMutation.isPending ? "Scheduling..." : "Schedule & Notify"}
+                  {updateApplicationMutation.isPending
+                    ? "Scheduling..."
+                    : "Schedule & Notify"}
                 </Button>
               </div>
             </div>
@@ -1381,7 +1478,10 @@ export function EmployerDashboard() {
       </Dialog>
 
       {/* Not Proceeding Modal */}
-      <Dialog open={showNotProceedingModal} onOpenChange={setShowNotProceedingModal}>
+      <Dialog
+        open={showNotProceedingModal}
+        onOpenChange={setShowNotProceedingModal}
+      >
         <DialogContent className="sm:max-w-[450px]">
           <DialogHeader>
             <DialogTitle>Not Proceeding with Application</DialogTitle>
@@ -1389,12 +1489,18 @@ export function EmployerDashboard() {
           {selectedApplication && (
             <div className="space-y-4">
               <div className="p-3 bg-muted rounded-md">
-                <p className="font-medium">{selectedApplication.firstName} {selectedApplication.lastName}</p>
-                <p className="text-sm text-muted-foreground">Applied for: {selectedApplication.jobTitle}</p>
+                <p className="font-medium">
+                  {selectedApplication.firstName} {selectedApplication.lastName}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Applied for: {selectedApplication.jobTitle}
+                </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="not-proceeding-reason">Reason for Not Proceeding *</Label>
+                <Label htmlFor="not-proceeding-reason">
+                  Reason for Not Proceeding *
+                </Label>
                 <Textarea
                   id="not-proceeding-reason"
                   value={notProceedingReason}
@@ -1404,13 +1510,14 @@ export function EmployerDashboard() {
                   data-testid="input-not-proceeding-reason"
                 />
                 <p className="text-xs text-muted-foreground">
-                  This reason will be sent to the applicant via SMS to provide feedback.
+                  This reason will be sent to the applicant via SMS to provide
+                  feedback.
                 </p>
               </div>
 
               <div className="flex justify-end space-x-2 pt-4">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => {
                     setShowNotProceedingModal(false);
                     setSelectedApplication(null);
@@ -1420,13 +1527,15 @@ export function EmployerDashboard() {
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   variant="destructive"
                   onClick={submitNotProceeding}
                   disabled={updateApplicationMutation.isPending}
                   data-testid="button-submit-not-proceeding"
                 >
-                  {updateApplicationMutation.isPending ? "Submitting..." : "Confirm & Notify"}
+                  {updateApplicationMutation.isPending
+                    ? "Submitting..."
+                    : "Confirm & Notify"}
                 </Button>
               </div>
             </div>
@@ -1446,7 +1555,10 @@ export function EmployerDashboard() {
           applicationId={statusModalApplication.id}
           applicantName={statusModalApplication.applicantName}
           onStatusSelect={(status) => {
-            if (status !== "interview_scheduled" && status !== "not_proceeding") {
+            if (
+              status !== "interview_scheduled" &&
+              status !== "not_proceeding"
+            ) {
               // Directly update status for other options
               updateApplicationMutation.mutate({
                 id: statusModalApplication.id,

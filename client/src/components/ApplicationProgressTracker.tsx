@@ -11,7 +11,6 @@ export function ApplicationProgressTracker({
   const steps = [
     { id: "applied", label: "Applied" },
     { id: "reviewed", label: "Reviewed" },
-    { id: "additional_docs_required", label: "Docs Required" },
     { id: "interview_scheduled", label: "Interview" },
     { id: "hired", label: "Hired" },
   ];
@@ -21,10 +20,10 @@ export function ApplicationProgressTracker({
     pending: 0,
     applied: 0,
     reviewed: 1,
-    additional_docs_required: 2,
-    interview_scheduled: 3,
-    interview_completed: 3,
-    hired: 4,
+    additional_docs_required: 1,
+    interview_scheduled: 2,
+    interview_completed: 2,
+    hired: 3,
     not_proceeding: -1,
     rejected: -1,
   };
@@ -52,7 +51,9 @@ export function ApplicationProgressTracker({
 
   return (
     <div className="w-full bg-white p-6 rounded-lg border border-gray-200">
-      <p className="text-sm font-medium text-gray-700 mb-4">Application Progress</p>
+      <p className="text-sm font-medium text-gray-700 mb-4">
+        Application Progress
+      </p>
 
       <div className="flex items-center justify-between">
         {steps.map((step, index) => {
@@ -68,8 +69,8 @@ export function ApplicationProgressTracker({
                     isCompleted
                       ? "bg-blue-500 text-white"
                       : isCurrent
-                        ? "bg-amber-400 text-white"
-                        : "bg-gray-300 text-gray-500"
+                      ? "bg-amber-400 text-white"
+                      : "bg-gray-300 text-gray-500"
                   }`}
                 >
                   {isCompleted ? (
@@ -82,9 +83,7 @@ export function ApplicationProgressTracker({
                 </div>
                 <p
                   className={`text-xs font-medium text-center max-w-16 transition-colors ${
-                    isCompleted || isCurrent
-                      ? "text-gray-900"
-                      : "text-gray-500"
+                    isCompleted || isCurrent ? "text-gray-900" : "text-gray-500"
                   }`}
                 >
                   {step.label}
@@ -108,17 +107,15 @@ export function ApplicationProgressTracker({
       <div className="mt-4 pt-4 border-t border-gray-200">
         <p className="text-xs text-gray-600">
           <span className="font-semibold text-gray-900">Current Status: </span>
-          {status === "additional_docs_required"
-            ? "Additional documents required - please upload to proceed"
-            : status === "interview_scheduled"
-              ? "Interview scheduled"
-              : status === "interview_completed"
-                ? "Interview completed"
-                : status === "reviewed"
-                  ? "Your application has been reviewed"
-                  : status === "hired"
-                    ? "Congratulations! You've been hired"
-                    : "Your application has been submitted"}
+          {status === "interview_scheduled"
+            ? "Interview scheduled"
+            : status === "interview_completed"
+            ? "Interview completed"
+            : status === "reviewed"
+            ? "Your application has been reviewed"
+            : status === "hired"
+            ? "Congratulations! You've been hired"
+            : "Your application has been submitted"}
         </p>
       </div>
     </div>

@@ -13,7 +13,6 @@ export function EmployerApplicationProgressTracker({
   const steps = [
     { id: "applied", label: "Applied" },
     { id: "reviewed", label: "Reviewed" },
-    { id: "additional_docs_required", label: "Docs Required" },
     { id: "interview_scheduled", label: "Interview" },
     { id: "hired", label: "Hired" },
   ];
@@ -23,10 +22,10 @@ export function EmployerApplicationProgressTracker({
     pending: 0,
     applied: 0,
     reviewed: 1,
-    additional_docs_required: 2,
-    interview_scheduled: 3,
-    interview_completed: 3,
-    hired: 4,
+    additional_docs_required: 1,
+    interview_scheduled: 2,
+    interview_completed: 2,
+    hired: 3,
     not_proceeding: -1,
     rejected: -1,
   };

@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { CheckCircle, Calendar, XCircle, ThumbsUp, FileText } from "lucide-react";
+import { CheckCircle, Calendar, XCircle, ThumbsUp } from "lucide-react";
 
 interface UpdateApplicationStatusModalProps {
   isOpen: boolean;
@@ -34,23 +34,19 @@ export function UpdateApplicationStatusModal({
 }: UpdateApplicationStatusModalProps) {
   const [selectedStatus, setSelectedStatus] = useState<string>("");
 
+  // Normalize the current status for comparison
+  const normalizedStatus = (currentStatus || "").toLowerCase().trim();
+
   const statusOptions = [
     {
       value: "reviewed",
       label: "Reviewed",
       description: "Application has been checked",
       icon: CheckCircle,
-      show: currentStatus === "pending" || currentStatus === "applied",
-    },
-    {
-      value: "additional_docs_required",
-      label: "Request Additional Documents",
-      description: "Applicant needs to submit more documents",
-      icon: FileText,
       show:
-        currentStatus === "pending" ||
-        currentStatus === "applied" ||
-        currentStatus === "reviewed",
+        normalizedStatus === "pending" ||
+        normalizedStatus === "applied" ||
+        normalizedStatus === "additional_docs_required",
     },
     {
       value: "interview_scheduled",
@@ -58,24 +54,27 @@ export function UpdateApplicationStatusModal({
       description: "Applicant is invited for an interview",
       icon: Calendar,
       show:
-        currentStatus === "pending" ||
-        currentStatus === "applied" ||
-        currentStatus === "reviewed" ||
-        currentStatus === "additional_docs_required",
+        normalizedStatus === "pending" ||
+        normalizedStatus === "applied" ||
+        normalizedStatus === "reviewed" ||
+        normalizedStatus === "additional_docs_required",
     },
     {
       value: "interview_done",
       label: "Interview Done",
       description: "Interview has been completed",
       icon: CheckCircle,
-      show: currentStatus === "interview_scheduled",
+      show:
+        normalizedStatus === "interview_scheduled",
     },
     {
       value: "hired",
       label: "Hired",
       description: "Applicant has been accepted",
       icon: ThumbsUp,
-      show: currentStatus === "interview_completed",
+      show:
+        normalizedStatus === "interview_completed" ||
+        normalizedStatus === "interview_scheduled",
     },
     {
       value: "not_proceeding",
@@ -83,12 +82,12 @@ export function UpdateApplicationStatusModal({
       description: "Application will not proceed",
       icon: XCircle,
       show:
-        currentStatus === "pending" ||
-        currentStatus === "applied" ||
-        currentStatus === "reviewed" ||
-        currentStatus === "additional_docs_required" ||
-        currentStatus === "interview_scheduled" ||
-        currentStatus === "interview_completed",
+        normalizedStatus === "pending" ||
+        normalizedStatus === "applied" ||
+        normalizedStatus === "reviewed" ||
+        normalizedStatus === "additional_docs_required" ||
+        normalizedStatus === "interview_scheduled" ||
+        normalizedStatus === "interview_completed",
     },
   ];
 

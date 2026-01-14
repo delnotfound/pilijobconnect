@@ -1,18 +1,29 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, Clock, Upload, FileText, Download } from "lucide-react";
+import { MapPin, Clock, Upload, FileText, X, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import type { Job, InsertApplication } from "@shared/schema";
 import { z } from "zod";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PILI_BARANGAYS } from "@shared/barangays";
 
 interface ApplicationModalProps {
@@ -28,15 +39,18 @@ const applicationSchema = z.object({
   middleName: z.string().optional(),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
-  phone: z.string()
+  phone: z
+    .string()
     .min(10, "Phone number must be at least 10 digits")
     .regex(/^(\+63|63)?9\d{9}$/, "Invalid Philippine mobile number format"),
   address: z.string().optional(),
-  coverLetter: z.string().optional(),
-  resume: z.string().min(1, "Resume is required"), // This will be the file path after upload
 });
 
-export default function ApplicationModal({ job, isOpen, onClose }: ApplicationModalProps) {
+export default function ApplicationModal({
+  job,
+  isOpen,
+  onClose,
+}: ApplicationModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -48,12 +62,25 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
       console.log("ApplicationModal - Job data:", job);
       console.log("ApplicationModal - Job ID:", job?.id);
       console.log("ApplicationModal - Job type:", typeof job?.id);
-      console.log("ApplicationModal - Job keys:", job ? Object.keys(job) : "No job");
+      console.log(
+        "ApplicationModal - Job keys:",
+        job ? Object.keys(job) : "No job"
+      );
     }
   }, [isOpen, job]);
 
-  const [applicationForm, setApplicationForm] = useState<Omit<InsertApplication, "applicantId" | "status" | "notes" | "smsNotificationSent" | "appliedAt" | "updatedAt">>({
-    jobId: 0, // Will be set when job is available
+  const [applicationForm, setApplicationForm] = useState<
+    Omit<
+      InsertApplication,
+      | "applicantId"
+      | "status"
+      | "notes"
+      | "smsNotificationSent"
+      | "appliedAt"
+      | "updatedAt"
+    >
+  >({
+    jobId: 0,
     firstName: "",
     middleName: "",
     lastName: "",
@@ -62,20 +89,36 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
     address: "",
     coverLetter: "",
     resume: "",
+    requiredDocuments: "",
+    submittedDocuments: "",
   });
 
-  const [resumeFile, setResumeFile] = useState<File | null>(null);
-  const [coverLetterFile, setCoverLetterFile] = useState<File | null>(null);
+  const [uploadedDocuments, setUploadedDocuments] = useState<{
+    [key: string]: string;
+  }>({});
   const [errors, setErrors] = useState({}); // State to hold validation errors
 
   // Auto-populate form when user data is available
   useEffect(() => {
     if (user && isOpen && job?.id) {
-      // Remove +63 prefix and any spaces/formatting from phone number
-      const cleanPhone = user.phone ? 
-        user.phone.replace(/^\+?63/, '').replace(/[\s\-\(\)]/g, '').replace(/\D/g, '') : '';
+      console.log("ApplicationModal - Auto-populating with user data:", {
+        userResume: user.resume
+          ? `${String(user.resume).substring(0, 50)}...`
+          : "undefined",
+        userCoverLetter: user.coverLetter
+          ? `${String(user.coverLetter).substring(0, 50)}...`
+          : "undefined",
+      });
 
-      setApplicationForm(prev => ({
+      // Remove +63 prefix and any spaces/formatting from phone number
+      const cleanPhone = user.phone
+        ? user.phone
+            .replace(/^\+?63/, "")
+            .replace(/[\s\-\(\)]/g, "")
+            .replace(/\D/g, "")
+        : "";
+
+      setApplicationForm((prev) => ({
         ...prev,
         jobId: job.id,
         firstName: user.firstName || "",
@@ -84,6 +127,27 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
         email: user.email || "",
         phone: cleanPhone,
       }));
+
+      // Auto-populate documents from user profile if available
+      const docsFromProfile: { [key: string]: string } = {};
+      if (user.resume) {
+        docsFromProfile["Resume"] = user.resume;
+      }
+      if (user.coverLetter) {
+        docsFromProfile["Cover_Letter"] = user.coverLetter;
+      }
+
+      // Set all documents at once
+      if (Object.keys(docsFromProfile).length > 0) {
+        console.log(
+          "ApplicationModal - Setting uploaded documents from profile:",
+          Object.keys(docsFromProfile)
+        );
+        setUploadedDocuments((prev) => ({
+          ...prev,
+          ...docsFromProfile,
+        }));
+      }
     }
   }, [user, isOpen, job?.id]);
 
@@ -91,19 +155,29 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
     mutationFn: async (applicationData: InsertApplication) => {
       console.log("Mutation called with applicationData:", applicationData);
       console.log("Mutation - jobId:", applicationData.jobId);
-      console.log("Mutation - API URL:", `/api/jobs/${applicationData.jobId}/apply`);
-      return await apiRequest(`/api/jobs/${applicationData.jobId}/apply`, "POST", applicationData);
+      console.log(
+        "Mutation - API URL:",
+        `/api/jobs/${applicationData.jobId}/apply`
+      );
+      return await apiRequest(
+        `/api/jobs/${applicationData.jobId}/apply`,
+        "POST",
+        applicationData
+      );
     },
     onSuccess: () => {
       toast({
         title: "Application Submitted",
-        description: "Your application has been sent to the employer successfully.",
+        description:
+          "Your application has been sent to the employer successfully.",
       });
       resetForm();
       onClose();
       queryClient.invalidateQueries({ queryKey: ["/api/jobs"] });
       queryClient.invalidateQueries({ queryKey: ["/api/employer/jobs"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/jobseeker/applications"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/jobseeker/applications"],
+      });
     },
     onError: () => {
       toast({
@@ -115,9 +189,12 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
   });
 
   const resetForm = () => {
-    // Remove +63 prefix and any spaces/formatting from phone number
-    const cleanPhone = user?.phone ? 
-      user.phone.replace(/^\+?63/, '').replace(/[\s\-\(\)]/g, '').replace(/\D/g, '') : '';
+    const cleanPhone = user?.phone
+      ? user.phone
+          .replace(/^\+?63/, "")
+          .replace(/[\s\-\(\)]/g, "")
+          .replace(/\D/g, "")
+      : "";
 
     setApplicationForm({
       jobId: job?.id || 0,
@@ -129,10 +206,11 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
       address: "",
       coverLetter: "",
       resume: "",
+      requiredDocuments: "",
+      submittedDocuments: "",
     });
-    setResumeFile(null);
-    setCoverLetterFile(null);
-    setErrors({}); // Clear errors on reset
+    setUploadedDocuments({});
+    setErrors({});
   };
 
   // Placeholder for the submitApplication function, which would typically call the mutation
@@ -144,193 +222,121 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
     e.preventDefault();
     setErrors({});
 
-    // Debug: Check if job and job.id exist
-    console.log("=== HANDLE SUBMIT DEBUG ===");
-    console.log("Job object:", job);
-    console.log("Job ID:", job?.id);
-    console.log("Job ID type:", typeof job?.id);
-    console.log("Job is null?", job === null);
-    console.log("Job is undefined?", job === undefined);
-    console.log("Job keys:", job ? Object.keys(job) : "No job");
-    console.log("==========================");
-
     if (!job || !job.id) {
-      console.error("Job or job.id is missing in handleSubmit");
-      console.error("Job:", job);
-      console.error("Job.id:", job?.id);
       toast({
         title: "Error",
         description: "Job information is missing. Please close and try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
-    // Capture job ID early to prevent it from being lost during async operations
-    const jobId = job.id;
-    console.log("Captured jobId:", jobId);
-
-    // Validate resume is required
-    if (!resumeFile) {
+    // Validate required documents
+    if (!uploadedDocuments["Valid_ID"]) {
       toast({
-        title: "Resume Required",
-        description: "Please attach a resume before submitting your application",
-        variant: "destructive"
+        title: "Missing Required Document",
+        description: "Valid ID is required to apply for this position",
+        variant: "destructive",
       });
       return;
     }
 
-    // Construct the application data object for validation
+    if (!uploadedDocuments["NBI_Clearance"]) {
+      toast({
+        title: "Missing Required Document",
+        description: "NBI Clearance is required to apply for this position",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const jobId = job.id;
+
     const applicationData = {
-      ...applicationForm,
-      jobId: jobId, // Ensure jobId is set
-      resume: resumeFile.name, // Use filename for initial validation, will be replaced by URL
+      jobId: jobId,
+      firstName: applicationForm.firstName,
+      middleName: applicationForm.middleName || undefined,
+      lastName: applicationForm.lastName,
+      email: applicationForm.email,
+      phone: applicationForm.phone,
+      address: applicationForm.address || undefined,
     };
 
     try {
-      const validatedData = applicationSchema.parse(applicationData);
-      console.log("Validated data jobId:", validatedData.jobId);
-
-      // Handle resume upload - convert file to base64
-      console.log("Starting resume upload...");
-      const resumeBase64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = (error) => {
-          console.error("FileReader error:", error);
-          reject(error);
-        };
-        reader.readAsDataURL(resumeFile);
-      });
-      console.log("Resume converted to base64, length:", resumeBase64.length);
-
-      console.log("Uploading resume to server...");
-      const uploadResponse = await fetch('/api/upload/resume', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          content: resumeBase64,
-        }),
-      });
-
-      if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json();
-        console.error("Resume upload failed:", errorData);
-        throw new Error(errorData.message || 'Failed to upload resume');
-      }
-
-      const uploadResult = await uploadResponse.json();
-      console.log("Resume upload successful:", uploadResult);
-
-      // Handle cover letter file upload if present
-      let coverLetterContent = applicationForm.coverLetter || "";
-      if (coverLetterFile) {
-        const coverLetterBase64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(coverLetterFile);
-        });
-
-        const coverLetterUploadResponse = await fetch('/api/upload/cover-letter', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            content: coverLetterBase64,
-          }),
-        });
-
-        if (!coverLetterUploadResponse.ok) {
-          const errorData = await coverLetterUploadResponse.json();
-          throw new Error(errorData.message || 'Failed to upload cover letter');
-        }
-
-        const coverLetterUploadResult = await coverLetterUploadResponse.json();
-        coverLetterContent = coverLetterUploadResult.filePath;
-      }
-
-
-      // Update application data with resume path and cover letter content
-      // Ensure phone number has proper +63 format for SMS
-      const formattedPhone = validatedData.phone.startsWith('+63') 
-        ? validatedData.phone 
-        : `+63${validatedData.phone.replace(/^\+?63/, '')}`;
-
-      const finalApplicationData = {
-        ...validatedData,
-        phone: formattedPhone,
-        resume: uploadResult.filePath,
-        coverLetter: coverLetterContent,
-        jobId: jobId, // Ensure jobId is preserved
-      };
-
-      console.log("Final application data:", finalApplicationData);
-      console.log("Final application data jobId:", finalApplicationData.jobId);
-      console.log("Final application data jobId type:", typeof finalApplicationData.jobId);
-      console.log("Original captured jobId:", jobId);
-
-      // Double-check that jobId is valid before submitting
-      if (!finalApplicationData.jobId || finalApplicationData.jobId === undefined) {
-        console.error("CRITICAL: jobId is still undefined in finalApplicationData!");
-        console.error("finalApplicationData:", finalApplicationData);
-        toast({
-          title: "Error",
-          description: "Job ID is missing. Please try again.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      await submitApplication(finalApplicationData);
-    } catch (error) {
-      console.error("Application submission error:", error);
-      
-      if (error instanceof z.ZodError) {
+      const result = applicationSchema.safeParse(applicationData);
+      if (!result.success) {
         const fieldErrors: any = {};
-        error.errors.forEach((err) => {
+        result.error.errors.forEach((err) => {
           if (err.path[0]) {
             fieldErrors[err.path[0]] = err.message;
           }
         });
         setErrors(fieldErrors);
-      } else {
-        // Check if it's a file upload error
-        const errorMessage = error instanceof Error ? error.message : "Failed to submit application";
-        const isFileUploadError = errorMessage.includes('upload') || errorMessage.includes('file');
-        
-        toast({
-          title: isFileUploadError ? "File Upload Failed" : "Application Failed",
-          description: errorMessage,
-          variant: "destructive"
-        });
+        return;
       }
+
+      const formattedPhone = applicationData.phone.startsWith("+63")
+        ? applicationData.phone
+        : `+63${applicationData.phone.replace(/^\+?63/, "")}`;
+
+      const finalApplicationData = {
+        ...applicationData,
+        phone: formattedPhone,
+        coverLetter: "",
+        resume: "application-submitted",
+        requiredDocuments:
+          Object.keys(uploadedDocuments).length > 0
+            ? JSON.stringify(Object.keys(uploadedDocuments))
+            : "",
+        submittedDocuments:
+          Object.keys(uploadedDocuments).length > 0
+            ? JSON.stringify(uploadedDocuments)
+            : "",
+        jobId: jobId,
+      };
+
+      if (!finalApplicationData.jobId) {
+        toast({
+          title: "Error",
+          description: "Job ID is missing. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      await submitApplication(finalApplicationData as InsertApplication);
+    } catch (error) {
+      console.error("Application submission error:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to submit application";
+      toast({
+        title: "Application Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
     }
   };
 
-  const handleResumeFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDocumentUpload = (
+    documentType: string,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = e.target.files?.[0];
     if (file) {
       // Validate file type
       const allowedTypes = [
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'text/plain'
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
       ];
       if (!allowedTypes.includes(file.type)) {
         toast({
           title: "Invalid file type",
-          description: "Please upload a PDF, Word document, or text file",
-          variant: "destructive"
+          description: "Please upload a PDF or image file (JPG, PNG)",
+          variant: "destructive",
         });
-        // Clear the input
-        if (e.target) {
-          e.target.value = '';
-        }
+        if (e.target) e.target.value = "";
         return;
       }
 
@@ -339,61 +345,39 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
         toast({
           title: "File too large",
           description: "File size must be less than 5MB",
-          variant: "destructive"
+          variant: "destructive",
         });
-        // Clear the input
-        if (e.target) {
-          e.target.value = '';
-        }
+        if (e.target) e.target.value = "";
         return;
       }
 
-      setResumeFile(file);
+      // Convert to base64 and store
+      const reader = new FileReader();
+      reader.onload = () => {
+        setUploadedDocuments((prev) => ({
+          ...prev,
+          [documentType]: reader.result as string,
+        }));
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleCoverLetterFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const maxSize = 2 * 1024 * 1024; // 2MB
-      if (file.size > maxSize) {
-        toast({
-          title: "File Too Large",
-          description: "Cover letter file must be smaller than 2MB",
-          variant: "destructive"
-        });
-        // Clear the input if the file is too large
-        if (e.target) {
-          e.target.value = '';
-        }
-        return;
-      }
-
-      const allowedTypes = ['text/plain', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-      if (!allowedTypes.includes(file.type)) {
-        toast({
-          title: "Invalid File Type",
-          description: "Please upload a TXT, PDF, DOC, or DOCX file",
-          variant: "destructive"
-        });
-        // Clear the input if the file type is invalid
-        if (e.target) {
-          e.target.value = '';
-        }
-        return;
-      }
-
-      setCoverLetterFile(file);
-      // Clear text area when file is uploaded
-      updateForm("coverLetter", "");
-    }
+  const removeDocument = (documentType: string) => {
+    setUploadedDocuments((prev) => {
+      const newDocs = { ...prev };
+      delete newDocs[documentType];
+      return newDocs;
+    });
   };
 
-  const updateForm = (field: keyof typeof applicationForm, value: string | number) => {
-    setApplicationForm(prev => ({ ...prev, [field]: value }));
-    // Clear specific field error when user types
+  const updateForm = (
+    field: keyof typeof applicationForm,
+    value: string | number
+  ) => {
+    setApplicationForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field as keyof typeof errors]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
@@ -449,7 +433,11 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
                 aria-invalid={!!errors.firstName}
                 aria-describedby="firstNameError"
               />
-              {errors.firstName && <p id="firstNameError" className="text-red-500 text-sm">{errors.firstName}</p>}
+              {errors.firstName && (
+                <p id="firstNameError" className="text-red-500 text-sm">
+                  {errors.firstName}
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="middleName">Middle Name</Label>
@@ -461,7 +449,11 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
                 aria-invalid={!!errors.middleName}
                 aria-describedby="middleNameError"
               />
-              {errors.middleName && <p id="middleNameError" className="text-red-500 text-sm">{errors.middleName}</p>}
+              {errors.middleName && (
+                <p id="middleNameError" className="text-red-500 text-sm">
+                  {errors.middleName}
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="lastName">Last Name *</Label>
@@ -474,7 +466,11 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
                 aria-invalid={!!errors.lastName}
                 aria-describedby="lastNameError"
               />
-              {errors.lastName && <p id="lastNameError" className="text-red-500 text-sm">{errors.lastName}</p>}
+              {errors.lastName && (
+                <p id="lastNameError" className="text-red-500 text-sm">
+                  {errors.lastName}
+                </p>
+              )}
             </div>
           </div>
 
@@ -489,7 +485,11 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
               aria-invalid={!!errors.email}
               aria-describedby="emailError"
             />
-            {errors.email && <p id="emailError" className="text-red-500 text-sm">{errors.email}</p>}
+            {errors.email && (
+              <p id="emailError" className="text-red-500 text-sm">
+                {errors.email}
+              </p>
+            )}
           </div>
 
           <div>
@@ -504,7 +504,10 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
                 value={applicationForm.phone}
                 onChange={(e) => {
                   // Remove all non-digits and any +63 prefix, then clean spaces
-                  const cleaned = e.target.value.replace(/[\s\-\(\)\+]/g, '').replace(/^63/, '').replace(/\D/g, '');
+                  const cleaned = e.target.value
+                    .replace(/[\s\-\(\)\+]/g, "")
+                    .replace(/^63/, "")
+                    .replace(/\D/g, "");
                   updateForm("phone", cleaned);
                 }}
                 placeholder="9171234567"
@@ -514,7 +517,11 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
                 aria-describedby="phoneError"
               />
             </div>
-            {errors.phone && <p id="phoneError" className="text-red-500 text-sm">{errors.phone}</p>}
+            {errors.phone && (
+              <p id="phoneError" className="text-red-500 text-sm">
+                {errors.phone}
+              </p>
+            )}
           </div>
 
           <div>
@@ -536,108 +543,136 @@ export default function ApplicationModal({ job, isOpen, onClose }: ApplicationMo
             </Select>
           </div>
 
-
-          <div>
-            <Label htmlFor="coverLetter">Cover Letter / Application Letter</Label>
-            {!coverLetterFile ? (
-              <div className="space-y-3">
-                <Textarea
-                  id="coverLetter"
-                  rows={4}
-                  placeholder="Tell us why you're interested in this position..."
-                  value={applicationForm.coverLetter || ""}
-                  onChange={(e) => updateForm("coverLetter", e.target.value)}
-                />
-                <div className="text-center">
-                  <p className="text-sm text-gray-500 mb-2">Or upload a cover letter file</p>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                    <FileText className="mx-auto text-gray-400 h-6 w-6 mb-2" />
-                    <label htmlFor="coverLetterUpload" className="text-primary cursor-pointer hover:underline">
-                      Upload Cover Letter
-                    </label>
-                    <p className="text-xs text-gray-500 mt-1">TXT, PDF, DOC, DOCX (Max 2MB)</p>
-                    <input
-                      id="coverLetterUpload"
-                      type="file"
-                      accept=".txt,.pdf,.doc,.docx"
-                      onChange={handleCoverLetterFileChange}
-                      className="hidden"
-                    />
+          {/* Job Requirements Section */}
+          {job?.requirements && (
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="p-4">
+                <div className="flex gap-3 mb-3">
+                  <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-blue-900 mb-2">
+                      Position Requirements
+                    </h4>
+                    <p className="text-sm text-blue-800 whitespace-pre-wrap">
+                      {job.requirements}
+                    </p>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="flex items-center">
-                    <FileText className="h-4 w-4 text-green-600 mr-2" />
-                    <span className="text-sm text-green-800">
-                      Cover letter file: {coverLetterFile.name}
-                    </span>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setCoverLetterFile(null);
-                      const input = document.getElementById("coverLetterUpload") as HTMLInputElement;
-                      if (input) input.value = "";
-                    }}
-                  >
-                    Remove
-                  </Button>
-                </div>
-                <p className="text-xs text-gray-500">
-                  You can still add additional text below if needed:
-                </p>
-                <Textarea
-                  id="coverLetterAdditional"
-                  rows={2}
-                  placeholder="Additional notes (optional)..."
-                  value={applicationForm.coverLetter || ""}
-                  onChange={(e) => updateForm("coverLetter", e.target.value)}
-                />
-              </div>
-            )}
-          </div>
+              </CardContent>
+            </Card>
+          )}
 
-          <div>
-            <Label htmlFor="resume">Resume/CV *</Label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-              <Upload className="mx-auto text-gray-400 h-8 w-8 mb-2" />
-              <p className="text-gray-600">
-                Drag and drop your resume, or{" "}
-                <label htmlFor="resumeUpload" className="text-primary cursor-pointer hover:underline">
-                  browse files
-                </label>
+          {/* Additional Documents Upload */}
+          <div className="space-y-4">
+            <div>
+              <Label className="text-base font-semibold mb-3 block">
+                Application Documents
+              </Label>
+              <p className="text-sm text-gray-600 mb-4">
+                {uploadedDocuments["Resume"] ||
+                uploadedDocuments["Cover_Letter"]
+                  ? "Your resume and cover letter from your profile have been auto-attached. You can add more documents below."
+                  : "Upload your resume, cover letter, and any additional documents required for this position"}
               </p>
-              <p className="text-sm text-gray-500 mt-1">PDF, DOC, DOCX, TXT (Max 5MB)</p>
-              <input
-                id="resumeUpload"
-                type="file"
-                accept=".pdf,.doc,.docx,.txt"
-                onChange={handleResumeFileChange}
-                className="hidden"
-              />
-              {resumeFile && (
-                <div className="mt-2 text-sm text-green-600">
-                  ✓ {resumeFile.name} selected
-                </div>
-              )}
+
+              <div className="space-y-3">
+                {[
+                  "Resume",
+                  "Cover_Letter",
+                  "Valid_ID",
+                  "NBI_Clearance",
+                  "Medical_Certificate",
+                  "Police_Clearance",
+                ].map((docType) => (
+                  <div key={docType}>
+                    <div className="flex items-center justify-between mb-2">
+                      <Label htmlFor={`${docType}-upload`} className="text-sm">
+                        {docType === "Cover_Letter"
+                          ? "Cover Letter"
+                          : docType.replace(/_/g, " ")}
+                        {(docType === "Valid_ID" ||
+                          docType === "NBI_Clearance") && (
+                          <span className="text-red-500 ml-1">*</span>
+                        )}
+                        {(docType === "Resume" || docType === "Cover_Letter") &&
+                        uploadedDocuments[docType] ? (
+                          <span className="text-xs text-blue-600 ml-2">
+                            (from profile)
+                          </span>
+                        ) : null}
+                      </Label>
+                      {uploadedDocuments[docType] && (
+                        <span className="text-xs text-green-600">
+                          ✓ Uploaded
+                        </span>
+                      )}
+                    </div>
+
+                    {!uploadedDocuments[docType] ? (
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-primary transition-colors">
+                        <FileText className="mx-auto text-gray-400 h-5 w-5 mb-2" />
+                        <label
+                          htmlFor={`${docType}-upload`}
+                          className="text-sm text-primary cursor-pointer hover:underline"
+                        >
+                          Upload{" "}
+                          {docType === "Cover_Letter"
+                            ? "Cover Letter"
+                            : docType.replace(/_/g, " ")}
+                        </label>
+                        <p className="text-xs text-gray-500 mt-1">
+                          PDF or Image (Max 5MB)
+                        </p>
+                        <input
+                          id={`${docType}-upload`}
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          onChange={(e) => handleDocumentUpload(docType, e)}
+                          className="hidden"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-green-600" />
+                          <span className="text-sm text-green-800">
+                            Document uploaded
+                          </span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeDocument(docType)}
+                          className="h-6 w-6 p-0"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-             {/* Display error if resume is required and not selected */}
-            {!resumeFile && (
-              <p className="text-red-500 text-sm mt-2">Resume is required to apply.</p>
-            )}
           </div>
 
           <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={handleClose} className="flex-1">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              className="flex-1"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={submitApplicationMutation.isPending || !resumeFile} className="flex-1">
-              {submitApplicationMutation.isPending ? "Submitting..." : "Submit Application"}
+            <Button
+              type="submit"
+              disabled={submitApplicationMutation.isPending}
+              className="flex-1"
+            >
+              {submitApplicationMutation.isPending
+                ? "Submitting..."
+                : "Submit Application"}
             </Button>
           </div>
         </form>

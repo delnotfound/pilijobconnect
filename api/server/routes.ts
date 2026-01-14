@@ -255,7 +255,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           desiredRoles,
           experienceLevel,
           preferredLocation,
+          resume,
+          coverLetter,
         } = req.body;
+
+        console.log("Profile update request body:", {
+          resume: resume
+            ? `${String(resume).substring(0, 50)}...`
+            : "undefined",
+          coverLetter: coverLetter
+            ? `${String(coverLetter).substring(0, 50)}...`
+            : "undefined",
+          firstName,
+          lastName,
+          email,
+        });
 
         // Check if email is being changed and if it's already taken by another user
         if (email) {
@@ -275,6 +289,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           desiredRoles,
           experienceLevel,
           preferredLocation,
+          resume,
+          coverLetter,
           updatedAt: new Date(),
         });
 
@@ -494,11 +510,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const validatedData = insertJobSchema.parse(req.body);
 
-        // Set the employerId to the current user if not provided (for admins)
+        // Set the employerId to the current user's ID if not provided
         if (!validatedData.employerId) {
           validatedData.employerId = req.user!;
         }
 
+        console.log(
+          "Creating job with employerId:",
+          validatedData.employerId,
+          "for user:",
+          req.user!
+        );
         const job = await storage.createJob(validatedData);
         res.status(201).json(job);
       } catch (error) {
@@ -1315,7 +1337,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     requireEmployer,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const employerJobs = await storage.getJobsByEmployer(req.user!);
+        const employerId = req.user!;
+        console.log("Fetching jobs for employerId:", employerId);
+        const employerJobs = await storage.getJobsByEmployer(employerId);
+        console.log(
+          `Found ${employerJobs.length} jobs for employer ${employerId}`
+        );
         res.json(employerJobs);
       } catch (error) {
         console.error("Error fetching employer jobs:", error);
@@ -1329,7 +1356,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     requireEmployer,
     async (req: AuthenticatedRequest, res) => {
       try {
-        const applications = await storage.getApplicationsByEmployer(req.user!);
+        const employerId = req.user!;
+        console.log("Fetching applications for employerId:", employerId);
+        const applications = await storage.getApplicationsByEmployer(
+          employerId
+        );
+        console.log(
+          `Found ${applications.length} applications for employer ${employerId}`
+        );
         res.json(applications);
       } catch (error) {
         console.error("Error fetching employer applications:", error);
@@ -2547,12 +2581,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Calculate rates and filter out categories with no applications
       const categoryHiringData = Object.entries(categoryHiring)
         .map(([category, data]) => {
-          const rate = data.applications > 0
-            ? parseFloat(((data.hired / data.applications) * 100).toFixed(1))
-            : 0;
-          return { category, applications: data.applications, hired: data.hired, rate };
+          const rate =
+            data.applications > 0
+              ? parseFloat(((data.hired / data.applications) * 100).toFixed(1))
+              : 0;
+          return {
+            category,
+            applications: data.applications,
+            hired: data.hired,
+            rate,
+          };
         })
-        .filter(data => data.applications > 0) // Only show categories with applications
+        .filter((data) => data.applications > 0) // Only show categories with applications
         .sort((a, b) => b.rate - a.rate);
 
       res.json({

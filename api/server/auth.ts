@@ -58,9 +58,7 @@ export async function validateSession(sessionId: string): Promise<User | null> {
 
     if (!session || session.expiresAt < new Date()) {
       if (session) {
-        await db
-          .delete(userSessions)
-          .where(eq(userSessions.id, sessionId));
+        await db.delete(userSessions).where(eq(userSessions.id, sessionId));
       }
       return null;
     }
@@ -86,18 +84,28 @@ export const requireAuth = async (
   next: NextFunction
 ) => {
   const sessionToken = req.cookies?.session;
+  console.log(
+    "requireAuth - sessionToken:",
+    sessionToken ? "present" : "missing"
+  );
 
   if (!sessionToken) {
     return res.status(401).json({ message: "Authentication required" });
   }
 
   const userObject = await validateSession(sessionToken);
+  console.log(
+    "requireAuth - userObject:",
+    userObject ? `User ${userObject.id}` : "null"
+  );
+
   if (!userObject) {
     return res.status(401).json({ message: "Invalid or expired session" });
   }
 
   req.user = userObject.id;
   req.userObject = userObject;
+  console.log("requireAuth - setting req.user to:", req.user);
   next();
 };
 
@@ -128,4 +136,3 @@ export function requireRole(roles: string[]) {
 export const requireJobSeeker = requireRole(["job_seeker"]);
 export const requireEmployer = requireRole(["employer", "admin"]);
 export const requireAdmin = requireRole(["admin"]);
-

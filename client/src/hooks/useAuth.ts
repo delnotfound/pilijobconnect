@@ -7,8 +7,20 @@ export interface User {
   email: string;
   role: "jobseeker" | "employer" | "admin";
   firstName?: string;
+  middleName?: string;
   lastName?: string;
   phone?: string;
+  address?: string;
+  profileImage?: string;
+  resume?: string;
+  coverLetter?: string;
+  skills?: string;
+  desiredRoles?: string;
+  experienceLevel?: string;
+  preferredLocation?: string;
+  isActive?: boolean;
+  isVerified?: boolean;
+  verificationStatus?: string;
 }
 
 export function useAuth() {
@@ -93,6 +105,10 @@ export function useAuth() {
   const refreshUser = async () => {
     try {
       const response = await apiRequest("/api/auth/me", "GET");
+      console.log("refreshUser response:", {
+        resume: response.user.resume ? `${String(response.user.resume).substring(0, 50)}...` : "undefined",
+        coverLetter: response.user.coverLetter ? `${String(response.user.coverLetter).substring(0, 50)}...` : "undefined",
+      });
       setUser(response.user);
       setIsAuthenticated(true);
       setCanPostJobs(response.user.role === "employer" || response.user.role === "admin");

@@ -21,6 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
+import { FileText, X, Upload } from "lucide-react";
 
 const profileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -53,8 +54,12 @@ export default function UserProfileModal({
     desiredRoles: "",
     experienceLevel: "",
     preferredLocation: "",
+    resume: "",
+    coverLetter: "",
   });
 
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [coverLetterFile, setCoverLetterFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<any>({});
 
   useEffect(() => {
@@ -69,15 +74,28 @@ export default function UserProfileModal({
         desiredRoles: user.desiredRoles || "",
         experienceLevel: user.experienceLevel || "",
         preferredLocation: user.preferredLocation || "",
+        resume: user.resume || "",
+        coverLetter: user.coverLetter || "",
       });
+      setResumeFile(null);
+      setCoverLetterFile(null);
     }
   }, [user, isOpen]);
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: any) => {
+      console.log("Sending profile update with:", {
+        resume: data.resume ? `${String(data.resume).substring(0, 50)}...` : "undefined",
+        coverLetter: data.coverLetter ? `${String(data.coverLetter).substring(0, 50)}...` : "undefined",
+      });
       return await apiRequest("/api/auth/profile", "PUT", data);
     },
-    onSuccess: async () => {
+    onSuccess: async (response) => {
+      console.log("Profile update response:", {
+        resume: response.user.resume ? `${String(response.user.resume).substring(0, 50)}...` : "undefined",
+        coverLetter: response.user.coverLetter ? `${String(response.user.coverLetter).substring(0, 50)}...` : "undefined",
+      });
+      
       await refreshUser();
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       queryClient.invalidateQueries({
@@ -101,7 +119,7 @@ export default function UserProfileModal({
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
 
@@ -143,6 +161,28 @@ export default function UserProfileModal({
         }
       }
 
+      // Handle file uploads and convert to base64
+      let resumeBase64 = profileData.resume;
+      let coverLetterBase64 = profileData.coverLetter;
+
+      if (resumeFile) {
+        resumeBase64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(resumeFile);
+        });
+      }
+
+      if (coverLetterFile) {
+        coverLetterBase64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(coverLetterFile);
+        });
+      }
+
       // Include job preference fields only for job seekers
       const completeData =
         user?.role === "jobseeker"
@@ -152,8 +192,14 @@ export default function UserProfileModal({
               desiredRoles: profileData.desiredRoles,
               experienceLevel: profileData.experienceLevel,
               preferredLocation: profileData.preferredLocation,
+              resume: resumeBase64 || undefined,
+              coverLetter: coverLetterBase64 || undefined,
             }
-          : validatedData;
+          : {
+              ...validatedData,
+              resume: resumeBase64 || undefined,
+              coverLetter: coverLetterBase64 || undefined,
+            };
 
       updateProfileMutation.mutate(completeData);
     } catch (error) {
@@ -165,6 +211,12 @@ export default function UserProfileModal({
           }
         });
         setErrors(fieldErrors);
+      } else if (error instanceof Error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
       }
     }
   };
@@ -174,6 +226,83 @@ export default function UserProfileModal({
     if (errors[field]) {
       setErrors((prev: any) => ({ ...prev, [field]: "" }));
     }
+  };
+
+  const handleResumeFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const allowedTypes = [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "text/plain",
+      ];
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload a PDF, Word document, or text file",
+          variant: "destructive",
+        });
+        if (e.target) e.target.value = "";
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "File size must be less than 5MB",
+          variant: "destructive",
+        });
+        if (e.target) e.target.value = "";
+        return;
+      }
+
+      setResumeFile(file);
+    }
+  };
+
+  const handleCoverLetterFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const maxSize = 2 * 1024 * 1024;
+      if (file.size > maxSize) {
+        toast({
+          title: "File Too Large",
+          description: "Cover letter file must be smaller than 2MB",
+          variant: "destructive",
+        });
+        if (e.target) e.target.value = "";
+        return;
+      }
+
+      const allowedTypes = [
+        "text/plain",
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ];
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: "Invalid File Type",
+          description: "Please upload a TXT, PDF, DOC, or DOCX file",
+          variant: "destructive",
+        });
+        if (e.target) e.target.value = "";
+        return;
+      }
+
+      setCoverLetterFile(file);
+    }
+  };
+
+  const removeResume = () => {
+    setResumeFile(null);
+    setProfileData((prev) => ({ ...prev, resume: "" }));
+  };
+
+  const removeCoverLetter = () => {
+    setCoverLetterFile(null);
+    setProfileData((prev) => ({ ...prev, coverLetter: "" }));
   };
 
   return (
@@ -265,6 +394,97 @@ export default function UserProfileModal({
 
           {user?.role === "jobseeker" && (
             <>
+              <div className="border-t pt-4 mt-4">
+                <h3 className="text-lg font-semibold mb-3">Application Documents</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Upload your resume and cover letter to auto-attach them when applying for jobs
+                </p>
+              </div>
+
+              {/* Resume Upload */}
+              <div className="space-y-2">
+                <Label htmlFor="resume">Resume/CV</Label>
+                {!resumeFile && !profileData.resume ? (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-primary transition-colors">
+                    <Upload className="mx-auto text-gray-400 h-6 w-6 mb-2" />
+                    <label
+                      htmlFor="resumeUpload"
+                      className="text-sm text-primary cursor-pointer hover:underline"
+                    >
+                      Upload Resume
+                    </label>
+                    <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX, TXT (Max 5MB)</p>
+                    <input
+                      id="resumeUpload"
+                      type="file"
+                      accept=".pdf,.doc,.docx,.txt"
+                      onChange={handleResumeFileChange}
+                      className="hidden"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-green-600" />
+                      <span className="text-sm text-green-800">
+                        {resumeFile?.name || "Resume uploaded"}
+                      </span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={removeResume}
+                      className="h-6 w-6 p-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Cover Letter Upload */}
+              <div className="space-y-2">
+                <Label htmlFor="coverLetter">Cover Letter</Label>
+                {!coverLetterFile && !profileData.coverLetter ? (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-primary transition-colors">
+                    <Upload className="mx-auto text-gray-400 h-6 w-6 mb-2" />
+                    <label
+                      htmlFor="coverLetterUpload"
+                      className="text-sm text-primary cursor-pointer hover:underline"
+                    >
+                      Upload Cover Letter
+                    </label>
+                    <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX, TXT (Max 2MB)</p>
+                    <input
+                      id="coverLetterUpload"
+                      type="file"
+                      accept=".pdf,.doc,.docx,.txt"
+                      onChange={handleCoverLetterFileChange}
+                      className="hidden"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-green-600" />
+                      <span className="text-sm text-green-800">
+                        {coverLetterFile?.name || "Cover letter uploaded"}
+                      </span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={removeCoverLetter}
+                      className="h-6 w-6 p-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+
               <div className="border-t pt-4 mt-4">
                 <h3 className="text-lg font-semibold mb-3">Job Preferences</h3>
                 <p className="text-sm text-gray-600 mb-4">
