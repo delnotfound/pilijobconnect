@@ -57,8 +57,8 @@ export function ApplicationProgressTracker({
 
       <div className="flex items-center justify-between">
         {steps.map((step, index) => {
-          const isCompleted = index < currentStepIndex;
-          const isCurrent = index === currentStepIndex;
+          const isCompleted = index <= currentStepIndex;
+          const isCurrent = index === currentStepIndex && currentStepIndex >= 0 && status !== "hired";
 
           return (
             <React.Fragment key={step.id}>
