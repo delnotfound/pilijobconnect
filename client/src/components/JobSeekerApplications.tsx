@@ -47,6 +47,7 @@ export function JobSeekerApplications() {
   const { data: applications = [], isLoading } = useQuery<Application[]>({
     queryKey: ["/api/jobseeker/applications"],
     enabled: !!user && user.role === "jobseeker",
+    refetchInterval: 5000, // Refetch every 5 seconds to see status updates
   });
 
   const getStatusColor = (status: string) => {

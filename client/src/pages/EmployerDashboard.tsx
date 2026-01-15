@@ -1195,7 +1195,7 @@ export function EmployerDashboard() {
                           <p className="text-sm font-medium text-green-700 dark:text-green-300">
                             📄 Submitted Documents:
                           </p>
-                          <div className="mt-2 space-y-2">
+                          <div className="mt-2 flex flex-wrap gap-[50px]">
                             {(() => {
                               try {
                                 const docs =
@@ -1216,7 +1216,7 @@ export function EmployerDashboard() {
                                         key={docType}
                                         size="sm"
                                         variant="default"
-                                        className="w-full justify-start bg-green-600 hover:bg-green-700"
+                                        className="bg-green-600 hover:bg-green-700"
                                         onClick={() => {
                                           downloadBase64File(
                                             dataUrl,
