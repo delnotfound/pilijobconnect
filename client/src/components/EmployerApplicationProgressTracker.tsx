@@ -32,6 +32,7 @@ export function EmployerApplicationProgressTracker({
 
   const currentStepIndex = statusToStepIndex[status] ?? -1;
   const isRejected = status === "not_proceeding" || status === "rejected";
+  const isHired = status === "hired";
 
   if (size === "sm") {
     // Compact version for employer dashboard
@@ -39,7 +40,7 @@ export function EmployerApplicationProgressTracker({
       <div className="flex items-center gap-1">
         {steps.map((step, index) => {
           const isCompleted = index <= currentStepIndex;
-          const isCurrent = index === currentStepIndex && currentStepIndex >= 0 && status !== "hired";
+          const isCurrent = index === currentStepIndex && currentStepIndex >= 0 && !isHired;
 
           return (
             <React.Fragment key={step.id}>
@@ -76,8 +77,9 @@ export function EmployerApplicationProgressTracker({
     <div className="w-full">
       <div className="flex items-center justify-between">
         {steps.map((step, index) => {
-          const isCompleted = index < currentStepIndex;
-          const isCurrent = index === currentStepIndex;
+          const isCompleted = index < currentStepIndex || (isHired && index <= currentStepIndex);
+          const isCurrent = index === currentStepIndex && !isHired;
+          const isHiredStep = isHired && index === currentStepIndex;
 
           return (
             <React.Fragment key={step.id}>
@@ -85,14 +87,16 @@ export function EmployerApplicationProgressTracker({
               <div className="flex flex-col items-center">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
-                    isCompleted
+                    isHiredStep
+                      ? "bg-green-500 text-white"
+                      : isCompleted
                       ? "bg-blue-500 text-white"
                       : isCurrent
                       ? "bg-amber-400 text-white"
                       : "bg-gray-300 text-gray-500"
                   }`}
                 >
-                  {isCompleted ? "✓" : isCurrent ? "•" : ""}
+                  {isHiredStep ? "✓" : isCompleted ? "✓" : isCurrent ? "•" : ""}
                 </div>
                 <p className="text-xs font-medium mt-1 text-center">
                   {step.label}
@@ -103,7 +107,7 @@ export function EmployerApplicationProgressTracker({
               {index < steps.length - 1 && (
                 <div
                   className={`flex-1 h-0.5 mx-1 transition-colors ${
-                    index < currentStepIndex ? "bg-blue-500" : "bg-gray-300"
+                    index < currentStepIndex || (isHired && index < 3) ? "bg-blue-500" : "bg-gray-300"
                   }`}
                 />
               )}
